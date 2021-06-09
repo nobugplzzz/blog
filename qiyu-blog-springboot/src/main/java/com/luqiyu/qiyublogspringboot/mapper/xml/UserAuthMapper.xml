@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luqiyu.qiyublogspringboot.mapper.UserAuthMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.luqiyu.qiyublogspringboot.entity.UserAuth">
+        <id column="id" property="id"/>
+        <result column="user_info_id" property="userInfoId"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="ip_addr" property="ipAddr"/>
+        <result column="ip_source" property="ipSource"/>
+        <result column="last_login_time" property="lastLoginTime"/>
+        <result column="is_disabled" property="isDisabled"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="userBackResultMap" type="com.luqiyu.qiyublogspringboot.dto.UserBackDTO">
+        <id column="id" property="id"/>
+        <result column="avatar" property="avatar"/>
+        <result column="nickname" property="nickname"/>
+        <result column="role_id" property="roleId"/>
+        <result column="is_disabled" property="isDisabled"/>
+        <result column="ip_addr" property="ipAddr"/>
+        <result column="ip_source" property="ipSource"/>
+        <result column="create_time" property="createTime"/>
+        <result column="last_login_time" property="lastLoginTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id
+        , user_info_id, username, password, ip_addr, ip_source, last_login_time, is_disabled, create_time, update_time
+    </sql>
+
+    <select id="listUsers" resultMap="userBackResultMap">
+        SELECT
+        ua.id,
+        ua.ip_addr,
+        ua.ip_source,
+        ua.is_disabled ,
+        ua.create_time,
+        ua.last_login_time ,
+        ui.avatar,
+        ui.nickname,
+        ur.role_id,
+        r.role_name
+        FROM user_auth ua
+        LEFT JOIN user_info ui ON ua.user_info_id = ui.id
+        LEFT JOIN user_role ur ON ua.id = ur.user_id
+        LEFT JOIN `role` r ON ua.id = r.id
+        <where>
+            <if test="condition.keywords!=null">
+                ui.nickname  like concat('%',#{condition.keywords},'%')
+            </if>
+        </where>
+        LIMIT #{condition.current},#{condition.size}
+    </select>
+
+    <select id="countUsers" resultType="java.lang.Long">
+        SELECT
+        count(1)
+        FROM user_auth ua
+        LEFT JOIN user_info ui ON ua.user_info_id = ui.id
+        <where>
+            <if test="condition.keywords!=null">
+                ui.nickname  like concat('%',#{condition.keywords},'%')
+            </if>
+        </where>
+    </select>
+</mapper>

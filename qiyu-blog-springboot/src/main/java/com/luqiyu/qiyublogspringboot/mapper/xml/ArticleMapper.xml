@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luqiyu.qiyublogspringboot.mapper.ArticleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.luqiyu.qiyublogspringboot.entity.Article">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="article_cover" property="articleCover"/>
+        <result column="article_title" property="articleTitle"/>
+        <result column="article_content" property="articleContent"/>
+        <result column="is_top" property="isTop"/>
+        <result column="is_draft" property="isDraft"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="articleBackResultMap" type="com.luqiyu.qiyublogspringboot.dto.ArticleBackDTO">
+        <id column="id" property="id"/>
+        <!--        <result column="user_id" property="userId" />-->
+        <!--        <result column="category_id" property="categoryId" />-->
+        <result column="article_cover" property="articleCover"/>
+        <result column="article_title" property="articleTitle"/>
+        <!--        <result column="article_content" property="articleContent" />-->
+        <result column="is_top" property="isTop"/>
+        <result column="is_draft" property="isDraft"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <!-- 特殊字段，是分类表的字段 需要修改为category_name-->
+        <result column="category_name" property="categoryName"/>
+        <collection property="tagDTOList" ofType="com.luqiyu.qiyublogspringboot.dto.TagDTO">
+            <!-- 需要跟sql语句的字段一致 -->
+            <id column="tag_id" property="id"/>
+            <result column="tag_name" property="name"/>
+        </collection>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id
+        , user_id, category_id, article_cover, article_title, article_content, is_top, is_draft, is_deleted, create_time, update_time
+    </sql>
+
+
+    <select id="listArticleBacks" resultMap="articleBackResultMap">
+        SELECT
+        a.id,
+        article_title,
+        is_top,
+        is_draft,
+        a.is_deleted,
+        a.create_time,
+        a.update_time,
+        category_name,
+        t.id AS tag_id,
+        t.`name` AS tag_name
+        FROM
+        (
+        SELECT
+        id,
+        article_title,
+        is_top,
+        is_draft,
+        is_deleted,
+        create_time,
+        update_time,
+        category_id
+        FROM
+        article
+        <where>
+            <if test="condition.isDeleted!=null">
+                is_deleted = #{condition.isDeleted}
+            </if>
+            <if test="condition.isDraft!=null">
+                and is_draft = #{condition.isDraft}
+            </if>
+            <if test="condition.keywords!=null">
+                and article_title like concat('%', #{condition.keywords},"%")
+            </if>
+        </where>
+        ORDER BY is_top DESC,id DESC
+        LIMIT #{condition.current},#{condition.size}
+        ) a
+        LEFT JOIN category c ON a.category_id = c.id
+        LEFT JOIN article_tag atg ON a.id=atg.article_id
+        LEFT JOIN tag t ON atg.tag_id=t.id
+        ORDER BY is_top DESC,a.id DESC
+    </select>
+
+    <select id="countArticleBacks" resultType="java.lang.Long">
+        SELECT
+        count(*)
+        FROM
+        article
+        <where>
+            <if test="condition.isDeleted!=null">
+                is_deleted = #{condition.isDeleted}
+            </if>
+            <if test="condition.isDraft != null">
+                and is_draft=#{condition.isDraft}
+            </if>
+            <if test="condition.keywords != null">
+                and article_title like concat('%',#{condition.keywords},'%')
+            </if>
+        </where>
+    </select>
+</mapper>
