@@ -1,6 +1,6 @@
 package com.luqiyu.qiyublogspringboot.handler;
 
-//import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSON;
 import com.luqiyu.qiyublogspringboot.annotation.OptLog;
 import com.luqiyu.qiyublogspringboot.entity.OperationLog;
 import com.luqiyu.qiyublogspringboot.mapper.OperationLogMapper;
@@ -90,9 +90,9 @@ public class OptLogAspect {
         // 请求方法
         operationLog.setOptMethod(methodName);
         // 请求参数
-//        operationLog.setRequestParam(JSON.toJSONString(joinPoint.getArgs()));
-//        // 返回结果
-//        operationLog.setResponseData(JSON.toJSONString(keys));
+        operationLog.setRequestParam(JSON.toJSONString(joinPoint.getArgs()));
+        // 返回结果
+        operationLog.setResponseData(JSON.toJSONString(keys));
 //        // 请求用户ID
 //        operationLog.setUserId(UserUtil.getLoginUser().getId());
 //        // 请求用户
