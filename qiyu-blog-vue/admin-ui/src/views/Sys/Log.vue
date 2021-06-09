@@ -50,7 +50,7 @@ export default {
         // {prop:"lastUpdateBy", label:"更新人", minWidth:100},
         // {prop:"lastUpdateTime", label:"更新时间", minWidth:120, formatter:this.dateFormat}
       ],
-      pageRequest: { pageNum: 1, pageSize: 8 },
+      pageRequest: { pageNum: 1, pageSize: 8, keywords: '' },
       pageResult: {},
       showOperation: false
     }
