@@ -4,18 +4,50 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.luqiyu.qiyublogspringboot.entity.Role">
-        <id column="id" property="id" />
-        <result column="role_name" property="roleName" />
-        <result column="role_label" property="roleLabel" />
-        <result column="is_disable" property="isDisable" />
-        <result column="role_remark" property="roleRemark" />
-        <result column="create_time" property="createTime" />
-        <result column="update_time" property="updateTime" />
+        <id column="id" property="id"/>
+        <result column="role_name" property="roleName"/>
+        <result column="role_label" property="roleLabel"/>
+        <result column="is_disable" property="isDisable"/>
+        <result column="role_remark" property="roleRemark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="RolePermissionMap" type="com.luqiyu.qiyublogspringboot.dto.UrlRoleDTO">
+        <result column="id" property="id"/>
+        <result column="url" property="url"/>
+        <result column="request_method" property="requestMethod"/>
+        <!-- 特殊字段，列表-->
+        <collection property="roleList" ofType="java.lang.String">
+            <constructor>
+                <arg column="role_label"/>
+            </constructor>
+        </collection>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, role_name, role_label, is_disable, role_remark, create_time, update_time
+        id
+        , role_name, role_label, is_disable, role_remark, create_time, update_time
     </sql>
 
+    <select id="listRoleByUserInfoId" resultType="java.lang.String">
+        SELECT role_label
+        FROM `role` r,
+             user_role ur
+        WHERE r.id = ur.role_id
+          AND ur.user_id = #{userInfoId}
+    </select>
+
+    <select id="listUrlRoles" resultMap="RolePermissionMap">
+        SELECT rs.id,
+               url,
+               request_method,
+               role_label
+        FROM resource rs
+                 LEFT JOIN role_resource re ON rs.id = re.resource_id
+                 LEFT JOIN `role` r ON re.role_id = r.id
+        WHERE parent_id IS NOT NULL
+          AND is_anonymous = 0
+    </select>
 </mapper>

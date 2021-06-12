@@ -6,6 +6,7 @@ import com.luqiyu.qiyublogspringboot.entity.UserAuth;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.luqiyu.qiyublogspringboot.vo.ConditionVO;
 import com.luqiyu.qiyublogspringboot.vo.PasswordVO;
+import com.luqiyu.qiyublogspringboot.vo.UserVO;
 
 /**
  * <p>
@@ -26,5 +27,9 @@ public interface UserAuthService extends IService<UserAuth> {
      */
     PageDTO<UserBackDTO> listUsersBackDTO(ConditionVO conditionVO);
 
-
+    /**
+     * 用户注册
+     * @param user 注册用户对象
+     */
+    void saveUser(UserVO user);
 }

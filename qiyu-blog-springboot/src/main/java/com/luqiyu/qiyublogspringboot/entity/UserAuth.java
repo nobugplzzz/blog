@@ -6,9 +6,7 @@ import com.baomidou.mybatisplus.annotation.Version;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 /**
  * <p>
@@ -21,6 +19,8 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserAuth implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -47,6 +47,11 @@ public class UserAuth implements Serializable {
     private String password;
 
     /**
+     * 登录方式
+     */
+    private Integer loginType;
+
+    /**
      * ip地址
      */
     private String ipAddr;
@@ -59,12 +64,7 @@ public class UserAuth implements Serializable {
     /**
      * 上次登录时间
      */
-    private String lastLoginTime;
-
-    /**
-     * 是否禁用
-     */
-    private Integer isDisabled;
+    private Date lastLoginTime;
 
     /**
      * 添加时间

@@ -6,6 +6,8 @@ import com.luqiyu.qiyublogspringboot.entity.OperationLog;
 import com.luqiyu.qiyublogspringboot.mapper.OperationLogMapper;
 //import com.luqiyu.qiyublogspringboot.util.IpUtil;
 //import com.luqiyu.qiyublogspringboot.util.UserUtil;
+import com.luqiyu.qiyublogspringboot.util.IpUtil;
+import com.luqiyu.qiyublogspringboot.util.UserUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.aspectj.lang.JoinPoint;
@@ -93,14 +95,14 @@ public class OptLogAspect {
         operationLog.setRequestParam(JSON.toJSONString(joinPoint.getArgs()));
         // 返回结果
         operationLog.setResponseData(JSON.toJSONString(keys));
-//        // 请求用户ID
-//        operationLog.setUserId(UserUtil.getLoginUser().getId());
-//        // 请求用户
-//        operationLog.setNickname(UserUtil.getLoginUser().getNickname());
-//        // 请求IP
-//        String ipAddr = IpUtil.getIpAddr(request);
-//        operationLog.setIpAddr(ipAddr);
-//        operationLog.setIpSource(IpUtil.getIpSource(ipAddr));
+        // 请求用户ID
+        operationLog.setUserId(UserUtil.getLoginUser().getId());
+        // 请求用户
+        operationLog.setNickname(UserUtil.getLoginUser().getNickname());
+        // 请求IP
+        String ipAddr = IpUtil.getIpAddr(request);
+        operationLog.setIpAddr(ipAddr);
+        operationLog.setIpSource(IpUtil.getIpSource(ipAddr));
         // 请求URL
         operationLog.setOptUrl(request.getRequestURI());
         // 创建时间

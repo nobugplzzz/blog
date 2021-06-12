@@ -56,6 +56,12 @@ public class UserInfo implements Serializable {
      */
     private String webSite;
 
+
+    /**
+     * 是否禁用
+     */
+    private Integer isDisabled;
+
     /**
      * 添加时间
      */

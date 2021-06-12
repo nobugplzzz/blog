@@ -8,16 +8,16 @@ import axios from '../axios'
 // 登录
 export const login = data => {
   return axios({
-    url: '/sys/login',
+    url: '/api/login',
     method: 'post',
     data
   })
 }
 
-// 登出
+// 注销
 export const logout = () => {
   return axios({
-    url: '/sys/logout',
+    url: '/api/logout',
     method: 'get'
   })
 }

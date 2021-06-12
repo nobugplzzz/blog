@@ -39,11 +39,11 @@
         ua.id,
         ua.ip_addr,
         ua.ip_source,
-        ua.is_disabled ,
         ua.create_time,
         ua.last_login_time ,
         ui.avatar,
         ui.nickname,
+        ui.is_disabled ,
         ur.role_id,
         r.role_name
         FROM user_auth ua
