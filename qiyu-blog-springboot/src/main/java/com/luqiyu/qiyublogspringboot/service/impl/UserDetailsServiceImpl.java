@@ -10,7 +10,7 @@ import com.luqiyu.qiyublogspringboot.exception.ServeException;
 import com.luqiyu.qiyublogspringboot.mapper.RoleMapper;
 import com.luqiyu.qiyublogspringboot.mapper.UserAuthMapper;
 import com.luqiyu.qiyublogspringboot.mapper.UserInfoMapper;
-import com.luqiyu.qiyublogspringboot.mapper.UserRoleMapper;
+//import com.luqiyu.qiyublogspringboot.mapper.UserRoleMapper;
 import com.luqiyu.qiyublogspringboot.util.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

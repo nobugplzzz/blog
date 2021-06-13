@@ -3,6 +3,7 @@ package com.luqiyu.qiyublogspringboot.dto;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 后台用户列表传输对象
@@ -23,6 +24,16 @@ public class UserBackDTO {
     private Integer id;
 
     /**
+     * 用户信息id
+     */
+    private Integer userInfoId;
+
+    /**
+     * 登录类型
+     */
+    private Integer loginType;
+
+    /**
      * 头像
      */
     private String avatar;
@@ -35,7 +46,7 @@ public class UserBackDTO {
     /**
      * 用户角色
      */
-    private Integer roleId;
+    private List<UserRoleDTO> roleList;
 
     /**
      * 是否禁用

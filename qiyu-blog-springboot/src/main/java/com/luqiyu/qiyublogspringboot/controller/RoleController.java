@@ -3,6 +3,7 @@ package com.luqiyu.qiyublogspringboot.controller;
 
 import com.luqiyu.qiyublogspringboot.constant.StatusCodeConst;
 import com.luqiyu.qiyublogspringboot.dto.PageDTO;
+import com.luqiyu.qiyublogspringboot.dto.UserRoleDTO;
 import com.luqiyu.qiyublogspringboot.entity.Role;
 import com.luqiyu.qiyublogspringboot.service.RoleService;
 import com.luqiyu.qiyublogspringboot.vo.ConditionVO;
@@ -30,7 +31,7 @@ public class RoleController {
     @Autowired
     RoleService roleService;
 
-    @ApiOperation(value = "查询角色列表")
+    @ApiOperation(value = "角色管理页面查询角色列表")
     @GetMapping("/admin/roles")
     public Result<PageDTO<Role>> listRoles(ConditionVO conditionVO){
         return new Result<>(true, StatusCodeConst.OK, "操作成功",roleService.listRoles(conditionVO));
@@ -55,6 +56,12 @@ public class RoleController {
     public Result updateRoleDisable(@PathVariable("roleId") @RequestBody Integer roleId,Integer isDisable){
         roleService.updateRoleDisable(roleId,isDisable);
         return new Result<>(true, StatusCodeConst.OK, "操作成功");
+    }
+
+    @ApiOperation(value = "编辑用户时查询用户角色选项列表")
+    @GetMapping("/admin/users/role")
+    public Result<List<UserRoleDTO>> listUserRoles() {
+        return new Result<>(true, StatusCodeConst.OK, "查询成功", roleService.listUserRoles());
     }
 }
 

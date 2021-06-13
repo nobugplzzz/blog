@@ -19,13 +19,18 @@
     <resultMap id="userBackResultMap" type="com.luqiyu.qiyublogspringboot.dto.UserBackDTO">
         <id column="id" property="id"/>
         <result column="avatar" property="avatar"/>
+        <result column="user_info_id" property="userInfoId"/>
+        <result column="login_type" property="loginType"/>
         <result column="nickname" property="nickname"/>
-        <result column="role_id" property="roleId"/>
         <result column="is_disabled" property="isDisabled"/>
         <result column="ip_addr" property="ipAddr"/>
         <result column="ip_source" property="ipSource"/>
         <result column="create_time" property="createTime"/>
         <result column="last_login_time" property="lastLoginTime"/>
+        <collection property="roleList" ofType="com.luqiyu.qiyublogspringboot.dto.UserRoleDTO">
+            <id column="role_id" property="id"/>
+            <id column="role_name" property="roleName"/>
+        </collection>
     </resultMap>
 
     <!-- 通用查询结果列 -->
@@ -37,24 +42,27 @@
     <select id="listUsers" resultMap="userBackResultMap">
         SELECT
         ua.id,
+        ua.user_info_id,
         ua.ip_addr,
+        ua.login_type,
         ua.ip_source,
         ua.create_time,
         ua.last_login_time ,
         ui.avatar,
         ui.nickname,
-        ui.is_disabled ,
+        ui.is_disabled,
         ur.role_id,
         r.role_name
         FROM user_auth ua
         LEFT JOIN user_info ui ON ua.user_info_id = ui.id
-        LEFT JOIN user_role ur ON ua.id = ur.user_id
-        LEFT JOIN `role` r ON ua.id = r.id
+        LEFT JOIN user_role ur ON ui.id = ur.user_id
+        LEFT JOIN `role` r ON r.id = ur.role_id
         <where>
             <if test="condition.keywords!=null">
-                ui.nickname  like concat('%',#{condition.keywords},'%')
+                ui.nickname like concat('%',#{condition.keywords},'%')
             </if>
         </where>
+        ORDER BY ua.user_info_id ASC
         LIMIT #{condition.current},#{condition.size}
     </select>
 
@@ -65,7 +73,7 @@
         LEFT JOIN user_info ui ON ua.user_info_id = ui.id
         <where>
             <if test="condition.keywords!=null">
-                ui.nickname  like concat('%',#{condition.keywords},'%')
+                ui.nickname like concat('%',#{condition.keywords},'%')
             </if>
         </where>
     </select>

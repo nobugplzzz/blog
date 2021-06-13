@@ -2,13 +2,9 @@
 <template>
   <!--  Login.vue 的模板 -->
   <el-form ref="loginForm" :model="loginForm" :rules="fieldRules" label-position="left" label-width="0px" class="demo-ruleForm login-container">
-    <span class="tool-bar">
-      <!-- 语言切换 -->
-      <lang-selector class="lang-selector" />
-    </span>
     <h2 class="title" style="padding-left:22px;">系统登录</h2>
-    <el-form-item prop="account">
-      <el-input v-model="loginForm.account" type="text" auto-complete="off" placeholder="账号" />
+    <el-form-item prop="username">
+      <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="账号" />
     </el-form-item>
     <el-form-item prop="password">
       <el-input v-model="loginForm.password" type="password" auto-complete="off" placeholder="密码" />
@@ -36,7 +32,7 @@
     <!-- <el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox> -->
     <el-form-item style="width:100%;">
       <el-button type="primary" style="width:48%;" @click.native.prevent="reset">重 置</el-button>
-      <el-button type="primary" style="width:48%;" :loading="loading" @click="login()">登 录</el-button>
+      <el-button type="primary" style="width:48%;" @click="login()">登 录</el-button>
     </el-form-item>
   </el-form>
 </template>
@@ -46,24 +42,21 @@
 // es6语法，导出模块本身,Vue-loader再后面做了些什么,相当于导出Vue.componen()
 // 即导出Login.Vue,name是Login
 import Cookies from 'js-cookie'
-import LangSelector from '@/components/LangSelector'
+import qs from 'qs'
 
 export default {
   name: 'Login',
-  components: {
-    LangSelector
-  },
   data() {
     return {
       loading: false,
       loginForm: {
-        account: 'admin',
-        password: 'admin',
+        username: 'admin@qq.com',
+        password: '123456',
         captcha: '', // 验证码
         src: ''
       },
       fieldRules: {
-        account: [
+        username: [
           { required: true, message: '请输入账号', trigger: 'blur' }
         ],
         password: [
@@ -78,21 +71,21 @@ export default {
   },
   methods: {
     login() {
-      this.loading = true
-      const userInfo = { account: this.loginForm.account, password: this.loginForm.password, captcha: this.loginForm.captcha }
+      var userInfo = { username: this.loginForm.username, password: this.loginForm.password, captcha: this.loginForm.captcha }
+      // SpringSecurity默认使用 param 形式获取数据，转化成form-data形式
+      userInfo = qs.stringify(userInfo)
       this.$api.login.login(userInfo).then((res) => {
-        if (res.msg != null) {
+        if (res.flag === false) {
           this.$message({
-            message: res.msg,
+            message: res.message,
             type: 'error'
           })
         } else {
           Cookies.set('token', res.data.token) // 放置token到Cookie
-          sessionStorage.setItem('user', userInfo.account) // 保存用户到本地会话
+          sessionStorage.setItem('user', userInfo.username) // 保存用户到本地会话
           this.$store.commit('menuRouteLoaded', false) // 要求重新加载导航菜单
           this.$router.push('/') // 登录成功，跳转到主页
         }
-        this.loading = false
       }).catch((res) => {
         this.$message({
           message: res.message,

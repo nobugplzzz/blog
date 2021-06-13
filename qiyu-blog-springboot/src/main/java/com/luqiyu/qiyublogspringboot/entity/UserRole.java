@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
 
 import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * <p>
@@ -13,7 +14,7 @@ import lombok.*;
  * </p>
  *
  * @author luqiyu
- * @since 2021-06-07
+ * @since 2021-06-12
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

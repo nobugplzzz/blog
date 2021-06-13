@@ -1,6 +1,7 @@
 package com.luqiyu.qiyublogspringboot.service;
 
 import com.luqiyu.qiyublogspringboot.dto.PageDTO;
+import com.luqiyu.qiyublogspringboot.dto.UserRoleDTO;
 import com.luqiyu.qiyublogspringboot.entity.Role;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.luqiyu.qiyublogspringboot.vo.ConditionVO;
@@ -42,4 +43,11 @@ public interface RoleService extends IService<Role> {
      * @param roleId 角色id
      */
     void updateRoleDisable(Integer roleId,Integer isDisable);
+
+    /**
+     * 编辑用户时查询用户角色选项
+     *
+     * @return 角色选项列表
+     */
+    List<UserRoleDTO> listUserRoles();
 }

@@ -14,10 +14,10 @@ export const listUsers = (data) => {
 }
 
 // 查询后台用户列表
-export const changeUserRole = (data) => {
+export const updateUserRole = (data) => {
   return axios({
-    url: '/api/admin/userRoles',
-    method: 'post',
+    url: '/api/admin/users/role',
+    method: 'put',
     data
   })
 }
@@ -28,5 +28,14 @@ export const findPermissions = (params) => {
     url: '/user/findPermissions',
     method: 'get',
     params
+  })
+}
+
+// 修改用户是否禁用
+export const updateUserSilence = (url, data) => {
+  return axios({
+    url: url,
+    method: 'put',
+    data
   })
 }

@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.luqiyu.qiyublogspringboot.dto.PageDTO;
+import com.luqiyu.qiyublogspringboot.dto.UserRoleDTO;
 import com.luqiyu.qiyublogspringboot.entity.Role;
 import com.luqiyu.qiyublogspringboot.mapper.RoleMapper;
 import com.luqiyu.qiyublogspringboot.service.RoleService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.luqiyu.qiyublogspringboot.util.BeanCopyUtil;
 import com.luqiyu.qiyublogspringboot.vo.ConditionVO;
 import com.luqiyu.qiyublogspringboot.vo.RoleVO;
 import javafx.beans.property.ReadOnlyListWrapper;
@@ -69,5 +71,13 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
                 .build();
 
         roleMapper.updateById(role);
+    }
+
+    @Override
+    public List<UserRoleDTO> listUserRoles() {
+        // 查询角色列表
+        List<Role> roleList = roleMapper.selectList(new LambdaQueryWrapper<Role>()
+                .select(Role::getId, Role::getRoleName));
+        return BeanCopyUtil.copyList(roleList, UserRoleDTO.class);
     }
 }

@@ -48,7 +48,7 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
     public PageDTO<UserBackDTO> listUsersBackDTO(ConditionVO condition) {
         // 转换页码
         condition.setCurrent((condition.getCurrent() - 1) * condition.getSize());
-        // 查询文章总数,自己写的sql三表查询
+        // 查询用户总数,自己写的sql三表查询
         Long count = userAuthMapper.countUsers(condition);
         if (count == 0) {
             return new PageDTO<>();

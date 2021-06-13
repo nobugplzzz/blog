@@ -36,7 +36,12 @@ export const updateRoleDisable = (url, data) => {
     data
   })
 }
-// 查询角色菜单集合
 
-// 保存角色菜单集合
+// 编辑用户时查询用户角色选项列表
+export const listUserRoles = () => {
+  return axios({
+    url: '/api/admin/users/role',
+    method: 'get'
+  })
+}
 
