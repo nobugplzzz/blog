@@ -1,6 +1,7 @@
 package com.luqiyu.qiyublogspringboot.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.luqiyu.qiyublogspringboot.dto.ArchiveDTO;
 import com.luqiyu.qiyublogspringboot.dto.ArticleBackDTO;
 import com.luqiyu.qiyublogspringboot.entity.Article;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -45,4 +46,11 @@ public interface ArticleMapper extends BaseMapper<Article> {
      * @return
      */
     List<Article> listArticleRank(@Param("articleIdList") List<Integer> articleIdList);
+
+    /**
+     *
+     * @param current
+     * @return
+     */
+    List<ArchiveDTO> listArchives();
 }

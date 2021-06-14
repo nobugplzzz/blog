@@ -3,6 +3,7 @@ package com.luqiyu.qiyublogspringboot.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.luqiyu.qiyublogspringboot.constant.CommonConst;
 import com.luqiyu.qiyublogspringboot.dto.*;
 import com.luqiyu.qiyublogspringboot.entity.Article;
 import com.luqiyu.qiyublogspringboot.entity.ArticleTag;
@@ -186,6 +187,20 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 .build()).collect(Collectors.toList());
         // articleService是this，也可以@AutoWire使用
         articleService.updateBatchById(articleList);
+    }
+
+    @Override
+    public PageDTO<ArchiveDTO> listArchives(Long current) {
+        Page<Article> page = new Page<>(current, 10);
+        // 获取分页数据
+        Page<Article> articlePage = articleMapper.selectPage(page, new LambdaQueryWrapper<Article>()
+                .select(Article::getId, Article::getArticleTitle, Article::getCreateTime)
+                .orderByDesc(Article::getCreateTime)
+                .eq(Article::getIsDeleted, CommonConst.FALSE)
+                .eq(Article::getIsDraft, CommonConst.FALSE));
+        // 拷贝dto集合
+        List<ArchiveDTO> archiveDTOList = BeanCopyUtil.copyList(articlePage.getRecords(), ArchiveDTO.class);
+        return new PageDTO<>(archiveDTOList, articlePage.getTotal());
     }
 }
 

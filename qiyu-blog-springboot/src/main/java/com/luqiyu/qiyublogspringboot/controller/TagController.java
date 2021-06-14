@@ -3,6 +3,7 @@ package com.luqiyu.qiyublogspringboot.controller;
 
 import com.luqiyu.qiyublogspringboot.constant.StatusCodeConst;
 import com.luqiyu.qiyublogspringboot.dto.PageDTO;
+import com.luqiyu.qiyublogspringboot.dto.TagDTO;
 import com.luqiyu.qiyublogspringboot.entity.Tag;
 import com.luqiyu.qiyublogspringboot.service.TagService;
 import com.luqiyu.qiyublogspringboot.vo.ConditionVO;
@@ -50,6 +51,12 @@ public class TagController {
     public Result deleteTag(@RequestBody List<Long> tagIdList) {
         tagService.deleteTag(tagIdList);
         return new Result<>(true, StatusCodeConst.OK, "删除成功");
+    }
+
+    @ApiOperation(value = "查看前台标签列表")
+    @GetMapping("/tags")
+    public Result<PageDTO<TagDTO>> listTags() {
+        return new Result<>(true, StatusCodeConst.OK, "查询成功", tagService.listTags());
     }
 }
 

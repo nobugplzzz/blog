@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.luqiyu.qiyublogspringboot.dto.CategoryBackDTO;
+import com.luqiyu.qiyublogspringboot.dto.CategoryDTO;
 import com.luqiyu.qiyublogspringboot.dto.PageDTO;
 import com.luqiyu.qiyublogspringboot.entity.Article;
 import com.luqiyu.qiyublogspringboot.entity.Category;
@@ -94,6 +95,14 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         }
 
         categoryMapper.deleteBatchIds(categoryIdList);
+    }
+
+    @Override
+    public PageDTO<CategoryDTO> listCategories() {
+        List<CategoryBackDTO> categoryBackDTOList = categoryMapper.listCategoryDTO();
+        List<CategoryDTO> categoryDTOS = BeanCopyUtil.copyList(categoryBackDTOList, CategoryDTO.class);
+        Long count = categoryMapper.selectCount(null).longValue();
+        return new PageDTO<>(categoryDTOS,count);
     }
 
 }

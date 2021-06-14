@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * <p>
- *  Mapper 接口
+ * Mapper 接口
  * </p>
  *
  * @author luqiyu
@@ -18,7 +18,8 @@ import java.util.List;
 @Mapper
 public interface CategoryMapper extends BaseMapper<Category> {
     /**
-     * 查询分类和对应文章数量
+     * 查询分类、对应文章数量
+     *
      * @return 分类集合
      */
     List<CategoryBackDTO> listCategoryDTO();

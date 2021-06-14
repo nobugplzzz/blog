@@ -1,5 +1,6 @@
 package com.luqiyu.qiyublogspringboot.service;
 
+import com.luqiyu.qiyublogspringboot.dto.ArchiveDTO;
 import com.luqiyu.qiyublogspringboot.dto.ArticleBackDTO;
 import com.luqiyu.qiyublogspringboot.dto.ArticleOptionDTO;
 import com.luqiyu.qiyublogspringboot.dto.PageDTO;
@@ -21,16 +22,12 @@ import java.util.List;
  * @since 2021-06-02
  */
 public interface ArticleService extends IService<Article> {
-
-
     /**
      * 查看后台文章列表
      * @param conditionVO 分页和搜索条件
      * @return
      */
     PageDTO<ArticleBackDTO> listArticleBackDTO(ConditionVO conditionVO);
-
-
 
     /**
      * 修改文章置顶
@@ -70,4 +67,12 @@ public interface ArticleService extends IService<Article> {
      * @param logicDeleteVO 逻辑删除状态和id列表
      */
     void updateArticleLogicDelete(LogicDeleteVO logicDeleteVO);
+
+    /**
+     * 查询文章归档
+     *
+     * @param current 当前页码
+     * @return 文章
+     */
+    PageDTO<ArchiveDTO> listArchives(Long current);
 }

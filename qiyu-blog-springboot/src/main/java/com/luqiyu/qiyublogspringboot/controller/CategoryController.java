@@ -4,6 +4,7 @@ package com.luqiyu.qiyublogspringboot.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.luqiyu.qiyublogspringboot.constant.StatusCodeConst;
 import com.luqiyu.qiyublogspringboot.dto.CategoryBackDTO;
+import com.luqiyu.qiyublogspringboot.dto.CategoryDTO;
 import com.luqiyu.qiyublogspringboot.dto.PageDTO;
 import com.luqiyu.qiyublogspringboot.entity.Category;
 import com.luqiyu.qiyublogspringboot.mapper.CategoryMapper;
@@ -56,6 +57,10 @@ public class CategoryController {
         return new Result<>(true, StatusCodeConst.OK, "操作成功");
     }
 
-
+    @ApiOperation(value = "查看前台分类列表")
+    @GetMapping("/categories")
+    public Result<PageDTO<CategoryDTO>> listCategories() {
+        return new Result<>(true, StatusCodeConst.OK, "查询成功", categoryService.listCategories());
+    }
 }
 

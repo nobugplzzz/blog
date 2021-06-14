@@ -4,11 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.luqiyu.qiyublogspringboot.dto.PageDTO;
+import com.luqiyu.qiyublogspringboot.dto.TagDTO;
 import com.luqiyu.qiyublogspringboot.entity.Tag;
 import com.luqiyu.qiyublogspringboot.exception.ServeException;
 import com.luqiyu.qiyublogspringboot.mapper.TagMapper;
 import com.luqiyu.qiyublogspringboot.service.TagService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.luqiyu.qiyublogspringboot.util.BeanCopyUtil;
 import com.luqiyu.qiyublogspringboot.vo.ConditionVO;
 import com.luqiyu.qiyublogspringboot.vo.TagVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,5 +81,17 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
                 .build();
 
         this.saveOrUpdate(tag);
+    }
+
+    @Override
+    public PageDTO<TagDTO> listTags() {
+        // 查询标签列表
+        List<Tag> tagList = tagMapper.selectList(new LambdaQueryWrapper<Tag>().select(Tag::getId, Tag::getName));
+        // 转换DTO
+        List<TagDTO> tagDTOList = BeanCopyUtil.copyList(tagList, TagDTO.class);
+        // 查询标签数量
+        Long count = tagMapper.selectCount(null).longValue();
+
+        return new PageDTO<>(tagDTOList, count);
     }
 }

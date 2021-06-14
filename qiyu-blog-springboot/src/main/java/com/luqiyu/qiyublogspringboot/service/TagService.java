@@ -1,6 +1,8 @@
 package com.luqiyu.qiyublogspringboot.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.luqiyu.qiyublogspringboot.dto.PageDTO;
+import com.luqiyu.qiyublogspringboot.dto.TagDTO;
 import com.luqiyu.qiyublogspringboot.entity.Tag;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.luqiyu.qiyublogspringboot.vo.CategoryVO;
@@ -41,4 +43,9 @@ public interface TagService extends IService<Tag> {
      */
     void saveOrUpdateTag(TagVO tagVO);
 
+    /**
+     * 查看前台标签列表
+     * @return 标签列表
+     */
+    PageDTO<TagDTO> listTags();
 }

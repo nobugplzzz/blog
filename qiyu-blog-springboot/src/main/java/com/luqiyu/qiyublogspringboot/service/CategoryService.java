@@ -1,6 +1,7 @@
 package com.luqiyu.qiyublogspringboot.service;
 
 import com.luqiyu.qiyublogspringboot.dto.CategoryBackDTO;
+import com.luqiyu.qiyublogspringboot.dto.CategoryDTO;
 import com.luqiyu.qiyublogspringboot.dto.PageDTO;
 import com.luqiyu.qiyublogspringboot.entity.Category;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -38,4 +39,10 @@ public interface CategoryService extends IService<Category> {
      * @param categoryIdList 分类集合
      */
     void deleteCategory(List<Integer> categoryIdList);
+
+    /**
+     * 查询前台分类列表
+     * @return 分类列表
+     */
+    PageDTO<CategoryDTO> listCategories();
 }

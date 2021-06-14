@@ -3,6 +3,7 @@ package com.luqiyu.qiyublogspringboot.controller;
 
 import com.luqiyu.qiyublogspringboot.annotation.OptLog;
 import com.luqiyu.qiyublogspringboot.constant.StatusCodeConst;
+import com.luqiyu.qiyublogspringboot.dto.ArchiveDTO;
 import com.luqiyu.qiyublogspringboot.dto.ArticleBackDTO;
 import com.luqiyu.qiyublogspringboot.dto.ArticleOptionDTO;
 import com.luqiyu.qiyublogspringboot.dto.PageDTO;
@@ -90,6 +91,13 @@ public class ArticleController {
     public Result updateArticleLogicDelete(LogicDeleteVO logicDeleteVO){
         articleService.updateArticleLogicDelete(logicDeleteVO);
         return new Result<>(true, StatusCodeConst.OK,"操作成功");
+    }
+
+    @ApiOperation(value = "查看前台文章归档")
+    @ApiImplicitParam(name = "current", value = "当前页码", required = true, dataType = "Long")
+    @GetMapping("/articles/archives")
+    public Result<PageDTO<ArchiveDTO>> listArchives(Long current) {
+        return new Result<>(true, StatusCodeConst.OK, "查询成功", articleService.listArchives(current));
     }
 }
 
