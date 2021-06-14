@@ -34,7 +34,7 @@
         </el-menu-item>
         <el-menu-item v-popover:popover-personal index="5">
           <!-- 用户信息 -->
-          <span class="user-info"><img :src="user.avatar">{{ user.name }}</span>
+          <span class="user-info"><img :src="user.avatar">{{ user.nickname }}</span>
           <el-popover ref="popover-personal" placement="bottom-end" trigger="hover" :visible-arrow="false">
             <PersonalPanel :user="user" />
           </el-popover>
@@ -63,10 +63,10 @@ export default {
   data() {
     return {
       user: {
-        name: 'Louis',
+        nickname: 'Louis',
         avatar: '',
-        role: '超级管理员',
-        registeInfo: '注册时间：2018-12-20 '
+        roleList: '超级管理员',
+        lastLoginTime: '注册时间：2018-12-20 '
       },
       activeIndex: '1',
       langVisible: false
@@ -74,15 +74,16 @@ export default {
   },
   computed: {
     ...mapState({
-      collapse: state => state.app.collapse
+      collapse: state => state.app.collapse, // 应该stroe里写get好理解些，如getUserInfo，现在其他地方用了太多不好改了
+      getUserInfo: state => state.user.userInfo
     })
   },
   // 钩子函数
   mounted() {
-    // this.sysName = 'I like Kitty'
-    var user = sessionStorage.getItem('user')
-    if (user) {
-      this.user.name = user
+    if (this.getUserInfo) {
+      this.user.nickname = this.getUserInfo.nickname
+      this.user.lastLoginTime = this.getUserInfo.lastLoginTime
+      this.user.roleList = this.getUserInfo.roleList
       this.user.avatar = require('@/assets/user.png')
     }
   },
