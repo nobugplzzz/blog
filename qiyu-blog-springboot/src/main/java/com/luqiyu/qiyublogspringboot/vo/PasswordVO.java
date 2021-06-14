@@ -11,7 +11,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 /**
- * 密码对象
+ * 修改密码视图对象，用于个人中心修改管理员密码
  *
  * @author 11921
  */

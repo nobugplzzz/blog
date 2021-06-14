@@ -1,5 +1,10 @@
 package com.luqiyu.qiyublogspringboot.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Date;
 import java.util.List;
 
@@ -9,16 +14,20 @@ import java.util.List;
  * @author: 启誉
  * @create: 2021-06-11
  **/
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class UserLoginDTO {
     /**
      * 用户账号id
      */
     private Integer id;
 
-//    /**
-//     * 用户角色,集合元素使用的是String类型，而不是Role对象，需要看一下创建这个对象的方法赋值是什么
-//     */
-//    private List<String> roleList;
+    /**
+     * 用户角色,集合元素使用的是String类型，而不是Role对象
+     */
+    private List<String> roleList;
 
 //    /**
 //     * 浏览器

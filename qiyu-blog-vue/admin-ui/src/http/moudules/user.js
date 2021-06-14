@@ -39,3 +39,21 @@ export const updateUserSilence = (url, data) => {
     data
   })
 }
+
+// 修改用户资料
+export const updateUserInfo = (data) => {
+  return axios({
+    url: '/api/users/info',
+    method: 'put',
+    data
+  })
+}
+
+// 修改管理员密码
+export const updateAdminPassword = (data) => {
+  return axios({
+    url: '/api/admin/users/password',
+    method: 'put',
+    data
+  })
+}

@@ -1,6 +1,7 @@
 package com.luqiyu.qiyublogspringboot.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.luqiyu.qiyublogspringboot.constant.CommonConst;
 import com.luqiyu.qiyublogspringboot.dto.PageDTO;
 import com.luqiyu.qiyublogspringboot.dto.UserBackDTO;
@@ -15,12 +16,14 @@ import com.luqiyu.qiyublogspringboot.mapper.UserInfoMapper;
 import com.luqiyu.qiyublogspringboot.mapper.UserRoleMapper;
 import com.luqiyu.qiyublogspringboot.service.UserAuthService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.luqiyu.qiyublogspringboot.util.UserUtil;
 import com.luqiyu.qiyublogspringboot.vo.ConditionVO;
 import com.luqiyu.qiyublogspringboot.vo.PasswordVO;
 import com.luqiyu.qiyublogspringboot.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -85,6 +88,38 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
                 .loginType(LoginTypeEnum.EMAIL.getType())
                 .build();
         userAuthMapper.insert(userAuth);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updatePassword(UserVO user) {
+        // 校验账号是否合法
+        if (!checkUser(user)) {
+            throw new ServeException("邮箱尚未注册！");
+        }
+        // 根据用户名修改密码 update...
+        userAuthMapper.update(new UserAuth(), new LambdaUpdateWrapper<UserAuth>()
+                // ...set
+                .set(UserAuth::getPassword, BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()))
+                .eq(UserAuth::getUsername, user.getUsername()));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updateAdminPassword(PasswordVO passwordVO) {
+        // 查询旧密码是否正确
+        UserAuth user = userAuthMapper.selectOne(new LambdaQueryWrapper<UserAuth>()
+                .eq(UserAuth::getId, UserUtil.getLoginUser().getId()));
+        // 正确则修改密码，错误则提示不正确
+        if (Objects.nonNull(user) && BCrypt.checkpw(passwordVO.getOldPassword(), user.getPassword())) {
+            UserAuth userAuth = UserAuth.builder()
+                    .id(UserUtil.getLoginUser().getId())
+                    .password(BCrypt.hashpw(passwordVO.getNewPassword(), BCrypt.gensalt()))
+                    .build();
+            userAuthMapper.updateById(userAuth);
+        } else {
+            throw new ServeException("旧密码不正确");
+        }
     }
 
     /**

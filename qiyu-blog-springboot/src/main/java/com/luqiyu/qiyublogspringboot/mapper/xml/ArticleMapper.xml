@@ -107,4 +107,21 @@
             </if>
         </where>
     </select>
+
+    <select id="listArticleRank" resultType="com.luqiyu.qiyublogspringboot.entity.Article">
+        SELECT
+        id,
+        article_title
+        FROM
+        tb_article
+        WHERE
+        id IN
+        <foreach collection="articleIdList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY field
+        <foreach collection="articleIdList" item="item" open="(id," separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
 </mapper>

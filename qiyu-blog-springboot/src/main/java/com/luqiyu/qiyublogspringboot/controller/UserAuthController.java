@@ -50,6 +50,19 @@ public class UserAuthController {
         return new Result<>(true, StatusCodeConst.OK,"注册成功");
     }
 
+    @ApiOperation(value = "修改管理员密码")
+    @PutMapping("/admin/users/password")
+    public Result updateAdminPassword(@Valid @RequestBody PasswordVO passwordVO) {
+        userAuthService.updateAdminPassword(passwordVO);
+        return new Result<>(true, StatusCodeConst.OK, "修改成功！");
+    }
 
+
+    @ApiOperation(value = "修改密码")
+    @PutMapping("/users/password")
+    public Result updatePassword(@Valid @RequestBody UserVO user) {
+        userAuthService.updatePassword(user);
+        return new Result<>(true, StatusCodeConst.OK, "修改成功！");
+    }
 }
 

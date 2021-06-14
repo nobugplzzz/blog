@@ -4,11 +4,11 @@ import axios from '../axios'
  * 日志管理模块
  */
 
-// 分页查询
-export const findPage = (data) => {
+// 查询操作日志
+export const listOperationLogs = (data) => {
   return axios({
-    url: '/log/findPage',
-    method: 'post',
-    data
+    url: '/api/admin/operation/logs',
+    method: 'get',
+    params: data
   })
 }

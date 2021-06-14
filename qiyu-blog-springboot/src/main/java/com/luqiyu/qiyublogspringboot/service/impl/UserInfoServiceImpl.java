@@ -7,10 +7,14 @@ import com.luqiyu.qiyublogspringboot.mapper.UserInfoMapper;
 import com.luqiyu.qiyublogspringboot.service.UserInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.luqiyu.qiyublogspringboot.service.UserRoleService;
+import com.luqiyu.qiyublogspringboot.util.UserUtil;
+import com.luqiyu.qiyublogspringboot.vo.UserInfoVO;
 import com.luqiyu.qiyublogspringboot.vo.UserRoleVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,6 +34,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     @Autowired
     UserRoleService userRoleService;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateUserDisable(Integer userInfoId, Integer isDisabled) {
         // 更新用户禁用状态
@@ -40,6 +45,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         userInfoMapper.updateById(userInfo);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateUserRole(UserRoleVO userRoleVO) {
         // 更新用户角色和昵称
@@ -60,5 +66,19 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 .collect(Collectors.toList());
         // 批量保存
         userRoleService.saveBatch(userRoleList);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updateUserInfo(UserInfoVO userInfoVO) {
+        // 封装用户信息
+        UserInfo userInfo = UserInfo.builder()
+                .id(UserUtil.getLoginUser().getUserInfoId())
+                .nickname(userInfoVO.getNickname())
+                .intro(userInfoVO.getIntro())
+                .webSite(userInfoVO.getWebSite())
+                .updateTime(new Date())
+                .build();
+        userInfoMapper.updateById(userInfo);
     }
 }

@@ -27,6 +27,11 @@ public class CategoryBackDTO {
     private String categoryName;
 
     /**
+     * 分类下的文章数量
+     */
+    private Integer articleCount;
+
+    /**
      * 添加时间
      */
     private Date createTime;

@@ -2,6 +2,7 @@ package com.luqiyu.qiyublogspringboot.service;
 
 import com.luqiyu.qiyublogspringboot.entity.UserInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.luqiyu.qiyublogspringboot.vo.UserInfoVO;
 import com.luqiyu.qiyublogspringboot.vo.UserRoleVO;
 
 /**
@@ -28,4 +29,10 @@ public interface UserInfoService extends IService<UserInfo> {
      * @param userRoleVO 用户权限
      */
     void updateUserRole(UserRoleVO userRoleVO);
+
+    /**
+     *  修改用户资料
+     * @param userInfoVO 用户信息对象
+     */
+    void updateUserInfo(UserInfoVO userInfoVO);
 }

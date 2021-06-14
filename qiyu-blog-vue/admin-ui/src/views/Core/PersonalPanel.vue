@@ -5,22 +5,23 @@
         <img class="avatar" :src="require('@/assets/user.png')">
       </div>
       <div class="name-role">
-        <span class="sender">{{ user.name }} - {{ user.role }}</span>
+        <span class="sender">{{ user.nickname }}</span>
+        <div class="sender">{{ user.roleList }}</div>
       </div>
       <div class="registe-info">
         <span class="registe-info">
           <li class="fa fa-clock-o" />
-          {{ user.registeInfo }}
+          登录时间-{{ user.lastLoginTime }}
         </span>
       </div>
     </div>
 
     <div class="main-operation">
       <span class="main-operation-item">
-        <el-button size="small" icon="fa fa-male" @click="$router.push('/personnal/personnal')"> 个人中心</el-button>
+        <el-button size="small" icon="fa fa-male" @click="$router.push('/personal/personal')"> 个人中心</el-button>
       </span>
       <span class="main-operation-item">
-        <el-button size="small" icon="fa fa-key"> 修改密码</el-button>
+        <el-button size="small" icon="fa fa-key" @click="$router.push('/personal/personal')"> 修改密码</el-button>
       </span>
     </div>
     <div class="other-operation">
@@ -50,10 +51,10 @@ export default {
       default: () => {
         [
           {
-            name: 'admin',
+            nickname: 'admin',
             avatar: '@/assets/user.png',
-            role: '超级管理员',
-            registeInfo: '注册时间：2018-12-25 '
+            roleList: '超级管理员',
+            lastLoginTime: '登录时间：2018-12-25 '
           }
         ]
       }
@@ -73,28 +74,13 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          sessionStorage.removeItem('user')
+          sessionStorage.removeItem('userName')
           this.$router.push('/login')
           this.$api.login.logout().then((res) => {
           }).catch(function(res) {
           })
         })
         .catch(() => {})
-    },
-    // 打开备份还原界面
-    handleBackup: function() {
-      this.backupVisible = true
-      this.$nextTick(() => {
-        this.$refs.backup.init()
-      })
-    },
-    // 成功还原之后，重新登录
-    afterRestore: function() {
-      sessionStorage.removeItem('user')
-      this.$router.push('/login')
-      this.$api.login.logout().then((res) => {
-      }).catch(function(res) {
-      })
     }
   }
 }

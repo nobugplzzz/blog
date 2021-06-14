@@ -39,17 +39,18 @@ export default {
       },
       columns: [
         { prop: 'id', label: 'ID', minWidth: 60 },
-        { prop: 'userName', label: '用户名', minWidth: 100 },
-        // {prop:"operation", label:"操作", minWidth:120},
-        { prop: 'method', label: '方法', minWidth: 180 },
-        { prop: 'params', label: '参数', minWidth: 220 },
+        { prop: 'optModule', label: '模块', minWidth: 120 },
+        { prop: 'optType', label: '操作', minWidth: 80 },
+        { prop: 'optUrl', label: 'url', minWidth: 180 },
+        { prop: 'requestMethod', label: '方法', minWidth: 80 },
         { prop: 'ip', label: 'IP', minWidth: 120 },
-        { prop: 'time', label: '耗时', minWidth: 80 },
-        { prop: 'createBy', label: '创建人', minWidth: 100 },
-        { prop: 'createTime', label: '创建时间', minWidth: 120, formatter: this.dateFormat }
-        // {prop:"lastUpdateBy", label:"更新人", minWidth:100},
-        // {prop:"lastUpdateTime", label:"更新时间", minWidth:120, formatter:this.dateFormat}
+        { prop: 'requestParam', label: '参数', minWidth: 250 },
+        { prop: 'ipAddr', label: 'ipAddr', minWidth: 100 },
+        { prop: 'createTime', label: '创建时间', minWidth: 120, formatter: this.dateFormat },
+        { prop: 'lastUpdateBy', label: '更新人', minWidth: 100 },
+        { prop: 'lastUpdateTime', label: '更新时间', minWidth: 120, formatter: this.dateFormat }
       ],
+      // 请求参数
       pageRequest: { pageNum: 1, pageSize: 8, keywords: '' },
       pageResult: {},
       showOperation: false
@@ -63,9 +64,10 @@ export default {
       if (data !== null) {
         this.pageRequest = data.pageRequest
       }
-      this.pageRequest.columnFilters = { userName: { name: 'userName', value: this.filters.name }}
-      this.$api.log.findPage(this.pageRequest).then((res) => {
-        this.pageResult = res.data
+      this.$api.log.listOperationLogs(this.pageRequest).then((res) => {
+        if (res.code === 20000) {
+          this.pageResult = res.data
+        }
       }).then(data != null ? data.callback : '')
     },
     // 时间格式化

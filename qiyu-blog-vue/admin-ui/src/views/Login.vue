@@ -73,8 +73,8 @@ export default {
     login() {
       var userInfo = { username: this.loginForm.username, password: this.loginForm.password, captcha: this.loginForm.captcha }
       // SpringSecurity默认使用 param 形式获取数据，转化成form-data形式
-      userInfo = qs.stringify(userInfo)
-      this.$api.login.login(userInfo).then((res) => {
+      const params = qs.stringify(userInfo)
+      this.$api.login.login(params).then((res) => {
         if (res.flag === false) {
           this.$message({
             message: res.message,
@@ -82,8 +82,9 @@ export default {
           })
         } else {
           Cookies.set('token', res.data.token) // 放置token到Cookie
-          sessionStorage.setItem('user', userInfo.username) // 保存用户到本地会话
+          sessionStorage.setItem('userName', res.data) // 保存用户到本地会话
           this.$store.commit('menuRouteLoaded', false) // 要求重新加载导航菜单
+          this.$store.commit('setUserInfo', res.data) // 保存用户信息,
           this.$router.push('/') // 登录成功，跳转到主页
         }
       }).catch((res) => {

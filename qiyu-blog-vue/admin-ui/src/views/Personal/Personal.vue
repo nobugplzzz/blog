@@ -13,21 +13,22 @@
             <el-image
               style="width: 100px; height: 100px"
               :src="user.avatar"
-              :fit="fit"
             />
           </el-upload>
           <el-form
-            label-width="70px"
+            ref="infoForm"
+            label-width="80px"
             :model="infoForm"
+            :rules="infoFormRule"
             style="width:320px;margin-left:3rem"
           >
-            <el-form-item label="昵称">
+            <el-form-item label="昵称" prop="nickname">
               <el-input v-model="infoForm.nickname" size="small" />
             </el-form-item>
-            <el-form-item label="个人简介">
+            <el-form-item label="个人简介" prop="intro">
               <el-input v-model="infoForm.intro" size="small" />
             </el-form-item>
-            <el-form-item label="个人网站">
+            <el-form-item label="个人网站" prop="webSite">
               <el-input v-model="infoForm.webSite" size="small" />
             </el-form-item>
             <el-button
@@ -43,8 +44,8 @@
       </el-tab-pane>
       <!-- 修改密码 -->
       <el-tab-pane label="修改密码" name="password">
-        <el-form label-width="70px" :model="passwordForm" style="width:320px">
-          <el-form-item label="旧密码">
+        <el-form ref="passwordForm" label-width="80px" :model="passwordForm" style="width:320px" :rules="passwordFormRule">
+          <el-form-item label="旧密码" prop="oldPassword">
             <el-input
               v-model="passwordForm.oldPassword"
               size="small"
@@ -52,7 +53,7 @@
               @keyup.enter.native="updatePassword"
             />
           </el-form-item>
-          <el-form-item label="新密码">
+          <el-form-item label="新密码" prop="newPassword">
             <el-input
               v-model="passwordForm.newPassword"
               size="small"
@@ -60,7 +61,7 @@
               @keyup.enter.native="updatePassword"
             />
           </el-form-item>
-          <el-form-item label="确认密码">
+          <el-form-item label="确认密码" prop="confirmPassword">
             <el-input
               v-model="passwordForm.confirmPassword"
               size="small"
@@ -100,9 +101,9 @@ export default {
   data: function() {
     return {
       infoForm: {
-        nickname: this.$store.state.nickname,
-        intro: this.$store.state.intro,
-        webSite: this.$store.state.webSite
+        nickname: this.$store.state.user.userInfo.nickname,
+        intro: this.$store.state.user.userInfo.intro,
+        webSite: this.$store.state.user.userInfo.webSite
       },
       passwordForm: {
         oldPassword: '',
@@ -113,6 +114,28 @@ export default {
       activeName: 'info',
       user: {
         avatar: ''
+      },
+      infoFormRule: {
+        nickname: [
+          { required: true, message: '昵称不能为空', trigger: 'blur' }
+        ],
+        intro: [
+          { required: true, message: '个人简介不能为空', trigger: 'blur' }
+        ],
+        webSite: [
+          { required: true, message: '个人网站不能为空', trigger: 'blur' }
+        ]
+      },
+      passwordFormRule: {
+        oldPassword: [
+          { required: true, message: '旧密码不能为空', trigger: 'blur' }
+        ],
+        newPassword: [
+          { required: true, message: '新密码不能为空', trigger: 'blur' }
+        ],
+        confirmPassword: [
+          { required: true, message: '确认密码不能为空', trigger: 'blur' }
+        ]
       }
     }
   },
@@ -137,48 +160,36 @@ export default {
       }
     },
     updateInfo() {
-      if (this.infoForm.nickname.trim() === '') {
-        this.$message.error('昵称不能为空')
-        return false
-      }
-      this.axios.put('/api/users/info', this.infoForm).then(({ data }) => {
-        if (data.flag) {
-          this.$message.success(data.message)
-          this.$store.commit('updateUserInfo', this.infoForm)
-        } else {
-          this.$message.error(data.message)
+      this.$refs.infoForm.validate((valid) => {
+        if (valid) {
+          this.$api.user.updateUserInfo(this.infoForm).then((res) => {
+            if (res.flag) {
+              this.$message.success(res.message)
+              this.$store.commit('updateUserInfo', this.infoForm)
+            } else {
+              this.$message.error(res.message)
+            }
+          })
         }
       })
     },
     updatePassword() {
-      if (this.passwordForm.oldPassword.trim() === '') {
-        this.$message.error('旧密码不能为空')
-        return false
-      }
-      if (this.passwordForm.newPassword.trim() === '') {
-        this.$message.error('新密码不能为空')
-        return false
-      }
-      if (this.passwordForm.newPassword.length < 6) {
-        this.$message.error('新密码不能少于6位')
-        return false
-      }
       if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
         this.$message.error('两次密码输入不一致')
         return false
       }
-      this.axios
-        .put('/api/admin/users/password', this.passwordForm)
-        .then(({ data }) => {
-          if (data.flag) {
-            this.passwordForm.oldPassword = ''
-            this.passwordForm.newPassword = ''
-            this.passwordForm.confirmPassword = ''
-            this.$message.success(data.message)
-          } else {
-            this.$message.error(data.message)
-          }
-        })
+      this.$refs.infoForm.validate((valid) => {
+        if (valid) {
+          this.$api.user.updateAdminPassword(this.passwordForm).then((res) => {
+            if (res.flag) {
+              this.$refs['passwordForm'].resetFields()
+              this.$message.success(res.message)
+            } else {
+              this.$message.error(res.message)
+            }
+          })
+        }
+      })
     },
     updateNotice() {
       if (this.notice.trim() === '') {

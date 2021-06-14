@@ -16,12 +16,12 @@ const router = new Router({
   routes: [
     {
       path: '/',
-      name: '首页',
+      name: 'layout',
       component: Home,
       children: [
         {
-          path: '',
-          name: '系统介绍',
+          path: '/',
+          name: '首页',
           component: Intro,
           meta: {
             icon: 'fa fa-home fa-lg'
@@ -29,7 +29,7 @@ const router = new Router({
         },
         {
           path: '/personal/personal',
-          name: '代码生成',
+          name: '个人中心',
           component: personal,
           meta: {
             icon: 'el-icon-mobile-phone'
@@ -53,9 +53,9 @@ const router = new Router({
 router.beforeEach((to, from, next) => {
   // 登录界面登录成功之后，会把用户信息保存在会话
   // 存在时间为会话生命周期，页面关闭即失效。
-  const userName = sessionStorage.getItem('user')
+  const userName = sessionStorage.getItem('userName')
   if (to.path === '/login') {
-    // 如果是访问登录界面，如果用户会话信息存在，代表已登录过，跳转到主页
+    // 如果是访问登录界面，如果用户会话信息存在，代表已登录过，跳转到主页,只检测是否登录，不负责登录注销跳转
     if (userName) {
       next({ path: '/' })
     } else {

@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
+import java.util.Date;
+
 /**
  * 统一查询条件
  * 或者说封装一个查询条件视图对象，某个视图或组件的数据封装起来
@@ -50,4 +52,16 @@ public class ConditionVO {
      */
     @ApiModelProperty(name = "isDraft", value = "草稿状态", dataType = "Integer")
     private Integer isDraft;
+
+    /**
+     * 开始时间
+     */
+    @ApiModelProperty(name = "startTime", value = "开始时间", dataType = "Date")
+    private Date startTime;
+
+    /**
+     * 结束时间
+     */
+    @ApiModelProperty(name = "endTime", value = "结束时间", dataType = "Date")
+    private Date endTime;
 }

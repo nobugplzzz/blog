@@ -38,4 +38,11 @@ public interface ArticleMapper extends BaseMapper<Article> {
      */
     Long countArticleBacks(@Param("condition") ConditionVO condition);
 
+    /**
+     * 查询文章排行
+     *
+     * @param articleIdList
+     * @return
+     */
+    List<Article> listArticleRank(@Param("articleIdList") List<Integer> articleIdList);
 }

@@ -19,4 +19,16 @@ public class CommonConst {
      * 默认用户头像
      */
     public static final String DEFAULT_AVATAR="https://www.static.talkxj.com/avatar/user.png";
+
+    /**
+     * 否
+     */
+    public static final int FALSE = 0;
+
+    /**
+     * 是
+     */
+    public static final int TURE = 1;
+
+
 }
