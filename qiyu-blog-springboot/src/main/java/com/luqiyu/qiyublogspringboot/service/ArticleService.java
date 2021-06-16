@@ -1,9 +1,6 @@
 package com.luqiyu.qiyublogspringboot.service;
 
-import com.luqiyu.qiyublogspringboot.dto.ArchiveDTO;
-import com.luqiyu.qiyublogspringboot.dto.ArticleBackDTO;
-import com.luqiyu.qiyublogspringboot.dto.ArticleOptionDTO;
-import com.luqiyu.qiyublogspringboot.dto.PageDTO;
+import com.luqiyu.qiyublogspringboot.dto.*;
 import com.luqiyu.qiyublogspringboot.entity.Article;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.luqiyu.qiyublogspringboot.vo.ArticleVO;
@@ -15,7 +12,7 @@ import java.util.List;
 
 /**
  * <p>
- *  服务类
+ * 服务类
  * </p>
  *
  * @author luqiyu
@@ -24,6 +21,7 @@ import java.util.List;
 public interface ArticleService extends IService<Article> {
     /**
      * 查看后台文章列表
+     *
      * @param conditionVO 分页和搜索条件
      * @return
      */
@@ -31,13 +29,15 @@ public interface ArticleService extends IService<Article> {
 
     /**
      * 修改文章置顶
+     *
      * @param articleId 文章id
-     * @param isTop 是否置顶
+     * @param isTop     是否置顶
      */
-    void updateArticleTop(Long articleId,Integer isTop);
+    void updateArticleTop(Long articleId, Integer isTop);
 
     /**
      * 后台根据id查询文章，编辑文章时查询
+     *
      * @param articleId
      * @return 文章
      */
@@ -45,12 +45,14 @@ public interface ArticleService extends IService<Article> {
 
     /**
      * 查询新建/编辑文章 选项
+     *
      * @return 文章选项
      */
     ArticleOptionDTO listArticleOptionDTO();
 
     /**
      * 新建或更新文章
+     *
      * @param articleVO 新建或更新文章的视图对象
      */
     void saveOrUpdateArticle(@Param("articleVO") ArticleVO articleVO);
@@ -64,6 +66,7 @@ public interface ArticleService extends IService<Article> {
 
     /**
      * 修改文章逻辑删除状态，恢复或逻辑删除文章
+     *
      * @param logicDeleteVO 逻辑删除状态和id列表
      */
     void updateArticleLogicDelete(LogicDeleteVO logicDeleteVO);
@@ -75,4 +78,26 @@ public interface ArticleService extends IService<Article> {
      * @return 文章
      */
     PageDTO<ArchiveDTO> listArchives(Long current);
+
+    /**
+     * 查询前台首页文章
+     *
+     * @param current 当前页
+     * @return 前台首页文章列表
+     */
+    List<ArticleHomeDTO> listArticles(Long current);
+
+    /**
+     * 前台根据id查看文章
+     *
+     * @param articleId 文章id
+     * @return ArticleDTO
+     */
+    ArticleDTO getArticleById(Integer articleId);
+
+    /**
+     * 查看最新文章
+     * @return 最新文章
+     */
+    List<ArticleRecommendDTO> listNewestArticles();
 }

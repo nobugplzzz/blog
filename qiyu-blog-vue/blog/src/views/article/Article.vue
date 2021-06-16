@@ -102,7 +102,7 @@
                 :key="item.id"
                 :to="'/tags/' + item.id"
               >
-                {{ item.tagName }}
+                {{ item.name }}
               </router-link>
             </div>
             <share style="margin-left:auto" :config="config" />

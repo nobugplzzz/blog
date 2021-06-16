@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar app :class="navClass" hide-on-scroll flat height="60">
+  <v-app-bar app class="nav-fixed" height="60">
     <!-- 电脑导航栏 -->
     <div class="d-md-block d-none nav-container">
       <div class="float-left blog-title">
@@ -85,19 +85,6 @@ export default {
     };
   },
   methods: {
-    scroll() {
-      const that = this;
-      let scrollTop =
-        window.pageYOffset ||
-        document.documentElement.scrollTop ||
-        document.body.scrollTop;
-      that.scrollTop = scrollTop;
-      if (that.scrollTop > 60) {
-        that.navClass = "nav-fixed";
-      } else {
-        that.navClass = "nav";
-      }
-    },
     openSearch() {
       this.$store.state.searchFlag = true;
     },

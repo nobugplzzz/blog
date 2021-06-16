@@ -15,6 +15,7 @@ import com.luqiyu.qiyublogspringboot.mapper.CategoryMapper;
 import com.luqiyu.qiyublogspringboot.mapper.TagMapper;
 import com.luqiyu.qiyublogspringboot.service.ArticleService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.luqiyu.qiyublogspringboot.service.ArticleTagService;
 import com.luqiyu.qiyublogspringboot.util.BeanCopyUtil;
 import com.luqiyu.qiyublogspringboot.vo.ArticleVO;
 import com.luqiyu.qiyublogspringboot.vo.ConditionVO;
@@ -48,6 +49,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     TagMapper tagMapper;
     @Autowired
     ArticleService articleService;
+    @Autowired
+    ArticleTagService articleTagService;
 
     @Override
     public PageDTO<ArticleBackDTO> listArticleBackDTO(ConditionVO condition) {
@@ -61,7 +64,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             return new PageDTO<>();
         }
 
-        // 分页，不使用Page对象
+        // 分页，不使用Page对象，因为不使用mp的selectPage方法
         List<ArticleBackDTO> articleBackDTOList = articleMapper.listArticleBacks(condition);
 
         return new PageDTO<>(articleBackDTOList, count);
@@ -163,6 +166,19 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 .isDraft(articleVO.getIsDraft())
                 .build();
         this.saveOrUpdate(article);
+        // 编辑文章则删除文章所有标签
+        if (Objects.nonNull(articleVO.getId()) && articleVO.getIsDraft().equals(CommonConst.FALSE)) {
+            articleTagMapper.delete(new LambdaQueryWrapper<ArticleTag>().eq(ArticleTag::getArticleId, articleVO.getId()));
+        }
+        // 添加文章标签
+        if (!articleVO.getTagIdList().isEmpty()) {
+            List<ArticleTag> articleTagList = articleVO.getTagIdList().stream().map(tagId -> ArticleTag.builder()
+                    .articleId(article.getId().intValue())
+                    .tagId(tagId)
+                    .build())
+                    .collect(Collectors.toList());
+            articleTagService.saveBatch(articleTagList);
+        }
     }
 
     @Override
@@ -201,6 +217,61 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // 拷贝dto集合
         List<ArchiveDTO> archiveDTOList = BeanCopyUtil.copyList(articlePage.getRecords(), ArchiveDTO.class);
         return new PageDTO<>(archiveDTOList, articlePage.getTotal());
+    }
+
+    @Override
+    public List<ArticleHomeDTO> listArticles(Long current) {
+        // 转换页码
+        Long c=(current-1)*10;
+        List<ArticleHomeDTO> articleHomeDTOList = articleMapper.listArticles(c);
+        return articleHomeDTOList;
+    }
+
+    @Override
+    public ArticleDTO getArticleById(Integer articleId) {
+        // 更新文章浏览量
+//        updateArticleViewsCount(articleId);
+        // 查询id对应的文章
+        ArticleDTO articleDTO = articleMapper.getArticleById(articleId);
+        // 查询上一篇下一篇文章
+        Article lastArticle = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
+                .select(Article::getId, Article::getArticleTitle, Article::getArticleCover)
+                .eq(Article::getIsDeleted, CommonConst.FALSE)
+                .eq(Article::getIsDraft, CommonConst.FALSE)
+                // lt???? 小于 <
+                //例: lt("age", 18)--->age < 18
+                .lt(Article::getId, articleId)
+                .orderByDesc(Article::getId)
+                // 无视优化规则直接拼接到 sql 的最后
+                .last("limit 1"));
+        Article nextArticle = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
+                .select(Article::getId, Article::getArticleTitle, Article::getArticleCover)
+                .eq(Article::getIsDeleted, CommonConst.FALSE)
+                .eq(Article::getIsDraft, CommonConst.FALSE)
+                .gt(Article::getId, articleId)
+                .orderByAsc(Article::getId)
+                .last("limit 1"));
+        articleDTO.setLastArticle(BeanCopyUtil.copyObject(lastArticle, ArticlePaginationDTO.class));
+        articleDTO.setNextArticle(BeanCopyUtil.copyObject(nextArticle, ArticlePaginationDTO.class));
+        // 查询相关推荐文章
+        articleDTO.setArticleRecommendList(articleMapper.listArticleRecommends(articleId));
+        // 封装点赞量和浏览量
+//        article.setViewsCount((Integer) redisTemplate.boundHashOps(ARTICLE_VIEWS_COUNT).get(articleId.toString()));
+//        article.setLikeCount((Integer) redisTemplate.boundHashOps(ARTICLE_LIKE_COUNT).get(articleId.toString()));
+
+        return articleDTO;
+    }
+
+    @Override
+    public List<ArticleRecommendDTO> listNewestArticles() {
+        // 查询最新文章
+        List<Article> articleList = articleMapper.selectList(new LambdaQueryWrapper<Article>()
+                .select(Article::getId, Article::getArticleTitle, Article::getArticleCover, Article::getCreateTime)
+                .eq(Article::getIsDeleted, CommonConst.FALSE)
+                .eq(Article::getIsDraft, CommonConst.FALSE)
+                .orderByDesc(Article::getId)
+                .last("limit 5"));
+        return BeanCopyUtil.copyList(articleList, ArticleRecommendDTO.class);
     }
 }
 

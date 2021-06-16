@@ -3,10 +3,7 @@ package com.luqiyu.qiyublogspringboot.controller;
 
 import com.luqiyu.qiyublogspringboot.annotation.OptLog;
 import com.luqiyu.qiyublogspringboot.constant.StatusCodeConst;
-import com.luqiyu.qiyublogspringboot.dto.ArchiveDTO;
-import com.luqiyu.qiyublogspringboot.dto.ArticleBackDTO;
-import com.luqiyu.qiyublogspringboot.dto.ArticleOptionDTO;
-import com.luqiyu.qiyublogspringboot.dto.PageDTO;
+import com.luqiyu.qiyublogspringboot.dto.*;
 import com.luqiyu.qiyublogspringboot.service.ArticleService;
 import com.luqiyu.qiyublogspringboot.vo.ArticleVO;
 import com.luqiyu.qiyublogspringboot.vo.ConditionVO;
@@ -99,5 +96,28 @@ public class ArticleController {
     public Result<PageDTO<ArchiveDTO>> listArchives(Long current) {
         return new Result<>(true, StatusCodeConst.OK, "查询成功", articleService.listArchives(current));
     }
+
+    // 接口swagger注释
+    @ApiOperation(value = "前台查看首页文章")
+    // 接口swagger隐式参数注释
+    @ApiImplicitParam(name = "current", value = "当前页码", required = true, dataType = "Long")
+    @GetMapping("/articles")
+    public Result<List<ArticleHomeDTO>> listArticles(Long current) {
+        return new Result<>(true, StatusCodeConst.OK, "查询成功", articleService.listArticles(current));
+    }
+
+    @ApiOperation(value = "前台根据id查看文章")
+    @ApiImplicitParam(name = "articleId", value = "文章id", required = true, dataType = "Integer")
+    @GetMapping("/articles/{articleId}")
+    public Result<ArticleDTO> getArticleById(@PathVariable("articleId") Integer articleId) {
+        return new Result<>(true, StatusCodeConst.OK, "查询成功", articleService.getArticleById(articleId));
+    }
+
+    @ApiOperation(value = "查看最新文章")
+    @GetMapping("/articles/newest")
+    public Result<List<ArticleRecommendDTO>> listNewestArticles() {
+        return new Result<>(true, StatusCodeConst.OK, "查询成功", articleService.listNewestArticles());
+    }
+
 }
 

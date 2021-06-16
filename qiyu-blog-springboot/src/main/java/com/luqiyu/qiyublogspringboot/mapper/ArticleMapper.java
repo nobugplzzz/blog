@@ -1,8 +1,7 @@
 package com.luqiyu.qiyublogspringboot.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.luqiyu.qiyublogspringboot.dto.ArchiveDTO;
-import com.luqiyu.qiyublogspringboot.dto.ArticleBackDTO;
+import com.luqiyu.qiyublogspringboot.dto.*;
 import com.luqiyu.qiyublogspringboot.entity.Article;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.luqiyu.qiyublogspringboot.vo.ConditionVO;
@@ -48,9 +47,26 @@ public interface ArticleMapper extends BaseMapper<Article> {
     List<Article> listArticleRank(@Param("articleIdList") List<Integer> articleIdList);
 
     /**
+     * 查询前台首页文章
      *
-     * @param current
-     * @return
+     * @param current 当前页码
+     * @return 首页文章集合
      */
-    List<ArchiveDTO> listArchives();
+    List<ArticleHomeDTO> listArticles(@Param("current")Long current);
+
+
+    /**
+     * 根据id查询前台文章
+     *
+     * @param articleId 文章id
+     * @return ArticleDTO
+     */
+    ArticleDTO getArticleById(@Param("articleId")Integer articleId);
+
+    /**
+     * 查看文章的推荐文章(查询相同标签文章)
+     * @param articleId 文章id
+     * @return 推荐文章
+     */
+    List<ArticleRecommendDTO> listArticleRecommends(@Param("articleId") Integer articleId);
 }

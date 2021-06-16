@@ -20,6 +20,7 @@ import com.luqiyu.qiyublogspringboot.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.rmi.ServerException;
 import java.util.Date;
@@ -62,6 +63,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         return pageDTO;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveOrUpdateCategory(CategoryVO categoryVO) {
         // 判断分类是否重复
@@ -85,6 +87,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteCategory(List<Integer> categoryIdList) {
         // 查询分类下是否有文章

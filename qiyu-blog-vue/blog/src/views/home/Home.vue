@@ -1,42 +1,7 @@
 <template>
   <div>
     <!-- banner -->
-    <div class="home-banner">
-      <div class="banner-container">
-        <!-- 联系方式 -->
-        <h1 class="blog-title animated zoomIn">
-          luqiyu的个人博客
-        </h1>
-        <!-- 一言 -->
-        <div class="blog-intro">
-          {{ obj.output }} <span class="typed-cursor">|</span>
-        </div>
-        <!-- 联系方式 -->
-        <div class="blog-contact">
-          <a
-            class="iconfont iconqq"
-            target="_blank"
-            href="http://wpa.qq.com/msgrd?v=3&uin=1192176811&site=qq&menu=yes"
-          />
-          <a
-            target="_blank"
-            href="https://github.com/X1192176811"
-            class="ml-5 mr-5 iconfont icongithub"
-          />
-          <a
-            target="_blank"
-            href="https://gitee.com/feng_meiyu"
-            class="iconfont icongitee-fill-round"
-          />
-        </div>
-      </div>
-      <!-- 向下滚动 -->
-      <div class="scroll-down" @click="scrollDown">
-        <v-icon color="#fff" class="scroll-down-effects">
-          mdi-chevron-down
-        </v-icon>
-      </div>
-    </div>
+
     <!-- 主页文章 -->
     <v-row class="home-container">
       <v-col md="9" cols="12">
@@ -53,7 +18,7 @@
                 class="on-hover"
                 width="100%"
                 height="100%"
-                :src="item.articleCover"
+                src="src\assets\img\ds.png"
               />
             </router-link>
           </div>
@@ -90,7 +55,7 @@
                 v-for="tag of item.tagDTOList"
                 :key="tag.id"
               >
-                <v-icon size="14">mdi-tag-multiple</v-icon>{{ tag.tagName }}
+                <v-icon size="14">mdi-tag-multiple</v-icon>{{ tag.name }}
               </router-link>
             </div>
             <!-- 文章内容 -->
@@ -202,7 +167,6 @@
 </template>
 
 <script>
-import EasyTyper from "easy-typer-js";
 export default {
   created() {
     this.init();
@@ -232,19 +196,6 @@ export default {
     // 初始化
     init() {
       document.title = this.$route.meta.title;
-      // 一言Api进行打字机循环输出效果
-      fetch("https://v1.hitokoto.cn?c=i")
-        .then(res => {
-          return res.json();
-        })
-        .then(({ hitokoto }) => {
-          this.initTyped(hitokoto);
-        });
-    },
-    initTyped(input, fn, hooks) {
-      const obj = this.obj;
-      // eslint-disable-next-line no-unused-vars
-      const typed = new EasyTyper(obj, input, fn, hooks);
     },
     scrollDown() {
       window.scrollTo({
@@ -253,8 +204,7 @@ export default {
       });
     },
     runTime() {
-      var timeold =
-        new Date().getTime() - new Date("December 12,2019").getTime();
+      var timeold = new Date().getTime() - new Date("June 12,2021").getTime();
       var msPerDay = 24 * 60 * 60 * 1000;
       var daysold = Math.floor(timeold / msPerDay);
       var str = "";
@@ -376,7 +326,7 @@ export default {
   }
   .home-container {
     max-width: 1200px;
-    margin: calc(100vh - 48px) auto 28px auto;
+    margin: 28px auto 28px auto;
     padding: 0 5px;
   }
   .article-card {

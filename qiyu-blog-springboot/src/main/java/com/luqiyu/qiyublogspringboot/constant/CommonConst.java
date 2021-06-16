@@ -30,5 +30,8 @@ public class CommonConst {
      */
     public static final int TURE = 1;
 
-
+    /**
+     * 博主id
+     */
+    public static final int BLOGGER_ID = 1;
 }

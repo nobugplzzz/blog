@@ -2,6 +2,7 @@ package com.luqiyu.qiyublogspringboot.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -22,8 +23,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowCredentials(true) // 是否发送cookie
                 .allowedHeaders("*") // 允许头部设置
                 .allowedOriginPatterns("*") // 允许跨域访问的源
-//                .allowedMethods("POST", "GET", "PUT", "OPTIONS", "DELETE");    // 允许请求方法
-                .allowedMethods("*");    // 允许请求方法
+                .allowedMethods("POST", "GET", "PUT", "OPTIONS", "DELETE"); // 允许请求方法
+//                .allowedMethods("*");    // 允许请求方法
     }
 
 }

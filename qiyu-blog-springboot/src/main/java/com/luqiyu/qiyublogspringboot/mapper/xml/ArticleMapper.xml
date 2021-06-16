@@ -38,12 +38,34 @@
         </collection>
     </resultMap>
 
-    <!-- 通用查询结果列 -->
-    <sql id="Base_Column_List">
-        id
-        , user_id, category_id, article_cover, article_title, article_content, is_top, is_draft, is_deleted, create_time, update_time
-    </sql>
+    <resultMap id="articleHomeResultMap" type="com.luqiyu.qiyublogspringboot.dto.ArticleHomeDTO">
+        <result column="id" property="id"/>
+        <result column="article_cover" property="articleCover"/>
+        <result column="article_title" property="articleTitle"/>
+        <result column="article_content" property="articleContent"/>
+        <result column="create_time" property="createTime"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="category_name" property="categoryName"/>
+        <collection property="tagDTOList" ofType="com.luqiyu.qiyublogspringboot.dto.TagDTO">
+            <result column="tag_id" property="id"/>
+            <result column="tag_name" property="name"/>
+        </collection>
+    </resultMap>
 
+    <resultMap id="articleResultMap" type="com.luqiyu.qiyublogspringboot.dto.ArticleDTO">
+        <result column="id" property="id"/>
+        <result column="article_cover" property="articleCover"/>
+        <result column="article_title" property="articleTitle"/>
+        <result column="article_content" property="articleContent"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="category_name" property="categoryName"/>
+        <collection property="tagDTOList" ofType="com.luqiyu.qiyublogspringboot.dto.TagDTO">
+            <result column="tag_id" property="id"/>
+            <result column="tag_name" property="name"/>
+        </collection>
+    </resultMap>
 
     <select id="listArticleBacks" resultMap="articleBackResultMap">
         SELECT
@@ -123,5 +145,86 @@
         <foreach collection="articleIdList" item="item" open="(id," separator="," close=")">
             #{item}
         </foreach>
+    </select>
+
+    <select id="listArticles" resultMap="articleHomeResultMap">
+        -- 再查文章标签，多对多
+        SELECT a.id,
+               article_cover,
+               article_title,
+               article_content,
+               is_top,
+               a.create_time,
+               category_id,
+               c.category_name,
+               atg.tag_id,
+               t.`name` AS tag_name
+        FROM (-- 先查文章和对应分类，多对一
+                 SELECT id,
+                        article_cover,
+                        article_title,
+                        article_content,
+                        is_top,
+                        a.create_time,
+                        category_id
+                 FROM article a
+                 WHERE is_draft = 0
+                   AND is_deleted = 0
+                 ORDER BY is_top DESC,
+                          id DESC LIMIT #{current}, 10
+             ) a
+                 -- inner join 目的是只要公共部分不为null的数据，不要值null的数据
+                 INNER JOIN category c ON a.category_id = c.id
+                 INNER JOIN article_tag atg ON a.id = atg.article_id
+                 INNER JOIN tag t ON tag_id = t.id
+        ORDER BY is_top DESC,
+                 id DESC
+    </select>
+
+    <select id="getArticleById" resultMap="articleResultMap">
+        SELECT a.id,
+               article_cover,
+               article_title,
+               article_content,
+               a.create_time,
+               a.update_time,
+               a.category_id,
+               category_name,
+               t.id AS  tag_id,
+               t.`name` AS tag_name
+        FROM article a
+                 INNER JOIN category c ON c.id = a.category_id
+                 INNER JOIN article_tag atg ON atg.article_id = a.id
+                 INNER JOIN tag t ON t.id = atg.tag_id
+        WHERE a.id = #{articleId}
+    </select>
+
+    <select id="listArticleRecommends" resultType="com.luqiyu.qiyublogspringboot.dto.ArticleRecommendDTO">
+        -- 查询推荐文章，根据文章id查询相同标签下的文章
+        SELECT
+            id,
+            article_title,
+            article_cover,
+            create_time
+        FROM
+            (-- 再根据查到的文章标签查询除了当前文章之外的所有文章id
+                SELECT
+                    article_id,
+                    t.tag_id
+                FROM
+                    ( -- 先查询文章标签（会查出全部）
+                        SELECT tag_id FROM article_tag WHERE article_tag.article_id = #{articleId} ) t
+                        JOIN article_tag atg ON atg.tag_id = t.tag_id
+                WHERE
+                    article_id != #{articleId}
+            ) t1
+                JOIN article a ON a.id = t1.article_id
+        WHERE
+            is_draft = 0
+          AND is_deleted = 0
+        ORDER BY
+            is_top DESC,
+            id DESC
+            LIMIT 6
     </select>
 </mapper>

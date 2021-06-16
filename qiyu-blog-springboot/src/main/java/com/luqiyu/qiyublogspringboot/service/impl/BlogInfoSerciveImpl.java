@@ -2,13 +2,12 @@ package com.luqiyu.qiyublogspringboot.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.luqiyu.qiyublogspringboot.constant.CommonConst;
-import com.luqiyu.qiyublogspringboot.dto.ArticleRankDTO;
-import com.luqiyu.qiyublogspringboot.dto.BlogBackInfoDTO;
-import com.luqiyu.qiyublogspringboot.dto.CategoryBackDTO;
-import com.luqiyu.qiyublogspringboot.dto.UniqueViewDTO;
+import com.luqiyu.qiyublogspringboot.dto.*;
 import com.luqiyu.qiyublogspringboot.entity.Article;
+import com.luqiyu.qiyublogspringboot.entity.UserInfo;
 import com.luqiyu.qiyublogspringboot.mapper.ArticleMapper;
 import com.luqiyu.qiyublogspringboot.mapper.CategoryMapper;
+import com.luqiyu.qiyublogspringboot.mapper.TagMapper;
 import com.luqiyu.qiyublogspringboot.mapper.UserInfoMapper;
 import com.luqiyu.qiyublogspringboot.service.BlogInfoService;
 import com.luqiyu.qiyublogspringboot.service.UniqueViewService;
@@ -39,7 +38,8 @@ public class BlogInfoSerciveImpl implements BlogInfoService {
     private UniqueViewService uniqueViewService;
     @Autowired
     CategoryMapper categoryMapper;
-
+    @Autowired
+    TagMapper tagMapper;
 
     @Override
     public BlogBackInfoDTO getBlogBackInfo() {
@@ -94,6 +94,38 @@ public class BlogInfoSerciveImpl implements BlogInfoService {
                 .categoryDTOList(categoryDTOList)
                 .uniqueViewDTOList(uniqueViewList)
 //                .articleRankDTOList(articleRankDTOList)
+                .build();
+    }
+
+    @Override
+    public BlogHomeInfoDTO getBlogInfo() {
+        //查询博主信息
+        UserInfo userInfo = userInfoMapper.selectOne(new LambdaQueryWrapper<UserInfo>()
+                .select(UserInfo::getAvatar, UserInfo::getNickname, UserInfo::getIntro)
+                .eq(UserInfo::getId, CommonConst.BLOGGER_ID));
+        // 查询文章数量
+        Integer articleCount = articleMapper.selectCount(new LambdaQueryWrapper<Article>()
+                .eq(Article::getIsDraft, CommonConst.FALSE)
+                .eq(Article::getIsDeleted, CommonConst.FALSE));
+        // 查询分类数量
+        Integer categoryCount = categoryMapper.selectCount(null);
+        // 查询标签数量
+        Integer tagCount = tagMapper.selectCount(null);
+//        // 查询公告
+//        Object value = redisTemplate.boundValueOps(NOTICE).get();
+//        String notice = Objects.nonNull(value) ? value.toString() : "发布你的第一篇公告吧";
+//        // 查询访问量
+//        String viewsCount = Objects.requireNonNull(redisTemplate.boundValueOps(BLOG_VIEWS_COUNT).get()).toString();
+        // 封装数据
+        return BlogHomeInfoDTO.builder()
+                .nickname(userInfo.getNickname())
+                .avatar(userInfo.getAvatar())
+                .intro(userInfo.getIntro())
+                .articleCount(articleCount)
+                .categoryCount(categoryCount)
+                .tagCount(tagCount)
+//                .notice(notice)
+//                .viewsCount(viewsCount)
                 .build();
     }
 
