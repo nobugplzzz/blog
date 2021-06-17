@@ -21,7 +21,7 @@ public class ArchiveDTO {
     /**
      * id
      */
-    private Integer id;
+    private Long id;
 
     /**
      * 标题

@@ -96,8 +96,19 @@ public interface ArticleService extends IService<Article> {
     ArticleDTO getArticleById(Integer articleId);
 
     /**
-     * 查看最新文章
+     * 前台查看最新文章
+     *
      * @return 最新文章
      */
     List<ArticleRecommendDTO> listNewestArticles();
+
+    /**
+     * 前台查看分类下对应的文章
+     * 返回值为什么不是处理成List<ArticlePreviewDTO>？？？？？？？？？而是封装成一个ArticlePreviewListDTO
+     * 因为有分类名或标签名前台需要展示，返回值是ArticlePreviewListDTO
+     *
+     * @param conditionVO
+     * @return
+     */
+    ArticlePreviewListDTO listArticlesByCondition(ConditionVO conditionVO);
 }

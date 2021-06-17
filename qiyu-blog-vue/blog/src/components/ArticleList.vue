@@ -50,7 +50,7 @@
                 v-for="tag of item.tagDTOList"
                 :key="tag.id"
               >
-                {{ tag.tagName }}
+                {{ tag.name }}
               </router-link>
             </div>
           </v-card>

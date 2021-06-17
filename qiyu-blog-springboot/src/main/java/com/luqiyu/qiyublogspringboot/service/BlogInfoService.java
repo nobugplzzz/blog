@@ -24,4 +24,10 @@ public interface BlogInfoService {
      * @return 前台首页博客对象
      */
     BlogHomeInfoDTO getBlogInfo();
+
+    /**
+     * 获取关于我内容
+     * @return 关于我内容
+     */
+    String getAbout();
 }

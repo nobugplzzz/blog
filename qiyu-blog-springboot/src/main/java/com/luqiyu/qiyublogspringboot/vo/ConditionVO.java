@@ -17,6 +17,9 @@ import java.util.Date;
 @Getter // 对象 to json
 @Setter //json to 对象
 @ToString // 打印测试
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @ApiModel("查询条件") //Swagger注解，pojo注释
 public class ConditionVO {
 
@@ -64,4 +67,17 @@ public class ConditionVO {
      */
     @ApiModelProperty(name = "endTime", value = "结束时间", dataType = "Date")
     private Date endTime;
+
+
+    /**
+     * 分类id
+     */
+    @ApiModelProperty(name = "categoryId", value = "分类id", dataType = "Integer")
+    private Integer categoryId;
+
+    /**
+     * 标签id
+     */
+    @ApiModelProperty(name = "tagId", value = "标签id", dataType = "Integer")
+    private Integer tagId;
 }

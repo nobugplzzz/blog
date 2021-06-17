@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luqiyu.qiyublogspringboot.mapper.MessageMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.luqiyu.qiyublogspringboot.entity.Message">
+        <id column="id" property="id" />
+        <result column="ip_address" property="ipAddress" />
+        <result column="ip_source" property="ipSource" />
+        <result column="nickname" property="nickname" />
+        <result column="avatar" property="avatar" />
+        <result column="message_content" property="messageContent" />
+        <result column="time" property="time" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, ip_address, ip_source, nickname, avatar, message_content, time, create_time
+    </sql>
+
+</mapper>

@@ -69,4 +69,12 @@ public interface ArticleMapper extends BaseMapper<Article> {
      * @return 推荐文章
      */
     List<ArticleRecommendDTO> listArticleRecommends(@Param("articleId") Integer articleId);
+
+    /**
+     * 前台查看分类/标签下对应的文章
+     *
+     * @param conditionVO 查询条件
+     * @return 分类/标签下对应的文章列表
+     */
+    List<ArticlePreviewDTO>listArticlesByCondition(@Param("conditionVO")ConditionVO conditionVO);
 }

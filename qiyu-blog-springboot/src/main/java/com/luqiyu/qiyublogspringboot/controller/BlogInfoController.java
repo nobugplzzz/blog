@@ -33,4 +33,10 @@ public class BlogInfoController {
     public Result<BlogHomeInfoDTO> getBlogHomeInfo() {
         return new Result<>(true, StatusCodeConst.OK, "查询成功", blogInfoService.getBlogInfo());
     }
+
+    @ApiOperation(value = "查看关于我信息")
+    @GetMapping("/about")
+    public Result<String> getAbout() {
+        return new Result(true, StatusCodeConst.OK, "查询成功", blogInfoService.getAbout());
+    }
 }

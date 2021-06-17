@@ -67,6 +67,19 @@
         </collection>
     </resultMap>
 
+    <resultMap id="ArticlePreviewResultMap" type="com.luqiyu.qiyublogspringboot.dto.ArticlePreviewDTO">
+        <result column="id" property="id"/>
+        <result column="article_cover" property="articleCover"/>
+        <result column="article_title" property="articleTitle"/>
+        <result column="create_time" property="createTime"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="category_name" property="categoryName"/>
+        <collection property="tagDTOList" ofType="com.luqiyu.qiyublogspringboot.dto.TagDTO">
+            <id column="tag_id" property="id"/>
+            <result column="tag_name" property="name"/>
+        </collection>
+    </resultMap>
+
     <select id="listArticleBacks" resultMap="articleBackResultMap">
         SELECT
         a.id,
@@ -190,7 +203,7 @@
                a.update_time,
                a.category_id,
                category_name,
-               t.id AS  tag_id,
+               t.id     AS tag_id,
                t.`name` AS tag_name
         FROM article a
                  INNER JOIN category c ON c.id = a.category_id
@@ -201,30 +214,61 @@
 
     <select id="listArticleRecommends" resultType="com.luqiyu.qiyublogspringboot.dto.ArticleRecommendDTO">
         -- 查询推荐文章，根据文章id查询相同标签下的文章
-        SELECT
-            id,
-            article_title,
-            article_cover,
-            create_time
-        FROM
-            (-- 再根据查到的文章标签查询除了当前文章之外的所有文章id
-                SELECT
-                    article_id,
-                    t.tag_id
-                FROM
-                    ( -- 先查询文章标签（会查出全部）
-                        SELECT tag_id FROM article_tag WHERE article_tag.article_id = #{articleId} ) t
-                        JOIN article_tag atg ON atg.tag_id = t.tag_id
-                WHERE
-                    article_id != #{articleId}
-            ) t1
-                JOIN article a ON a.id = t1.article_id
-        WHERE
-            is_draft = 0
+        SELECT id,
+               article_title,
+               article_cover,
+               create_time
+        FROM (-- 再根据查到的文章标签查询除了当前文章之外的所有文章id
+                 SELECT DISTINCT  article_id,
+                        t.tag_id
+                 FROM ( -- 先查询文章标签（会查出全部）
+                          SELECT tag_id FROM article_tag WHERE article_tag.article_id = #{articleId}) t
+                          JOIN article_tag atg ON atg.tag_id = t.tag_id
+                 WHERE article_id != #{articleId}
+             ) t1
+                 JOIN article a ON a.id = t1.article_id
+        WHERE is_draft = 0
           AND is_deleted = 0
-        ORDER BY
-            is_top DESC,
-            id DESC
-            LIMIT 6
+        ORDER BY is_top DESC,
+                 id DESC LIMIT 6
     </select>
+
+    <select id="listArticlesByCondition" resultMap="ArticlePreviewResultMap">
+        SELECT
+        tb.id,
+        article_title,
+        article_cover,
+        tb.create_time,
+        category_id,
+        category_name,
+        tag_id,
+        t.`name` AS tag_name
+        FROM (
+        SELECT
+        id,
+        article_title,
+        article_cover,
+        create_time,
+        category_id
+        FROM
+        article
+        <where>
+            <if test="conditionVO.categoryId != null">
+                category_id = #{conditionVO.categoryId}
+            </if>
+            <if test="conditionVO.tagId != null">
+                id IN ( SELECT article_id FROM article_tag WHERE tag_id = #{conditionVO.tagId} )
+            </if>
+        </where>
+        AND is_draft = 0
+        AND is_deleted = 0
+        ORDER BY
+        id DESC
+        LIMIT #{conditionVO.current} , 9
+        ) tb
+        INNER JOIN category c ON c.id = tb.category_id
+        INNER JOIN article_tag atg ON atg.article_id = tb.id
+        INNER JOIN tag t ON t.id = tag_id
+    </select>
+
 </mapper>

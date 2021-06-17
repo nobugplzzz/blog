@@ -4,7 +4,7 @@
     <div class="toolbar" style="float:left;padding-top:10px;padding-left:15px;">
       <el-form :inline="true" :model="filters" :size="size">
         <el-form-item>
-          <el-input v-model="filters.label" placeholder="名称" />
+          <el-input v-model="pageRequest.keywords" placeholder="名称" />
         </el-form-item>
         <el-form-item>
           <KtButton icon="fa fa-edit" :label="$t('action.search')" perms="sys:message:view" type="primary" @click="findPage(null)" />
@@ -38,9 +38,6 @@ export default {
   data() {
     return {
       size: 'small',
-      filters: {
-        label: ''
-      },
       columns: [
         { prop: 'id', label: 'ID', minWidth: 50 },
         { prop: 'avatar', label: '头像', minWidth: 100 },
@@ -52,7 +49,7 @@ export default {
         // {prop:"lastUpdateBy", label:"更新人", minWidth:100},
         // {prop:"lastUpdateTime", label:"更新时间", minWidth:120, formatter:this.dateFormat}
       ],
-      pageRequest: { pageNum: 1, pageSize: 8 },
+      pageRequest: { pageNum: 1, pageSize: 8, keywords: '' },
       pageResult: {}
     }
   },
@@ -62,8 +59,7 @@ export default {
       if (data !== null) {
         this.pageRequest = data.pageRequest
       }
-      this.pageRequest.columnFilters = { label: { name: 'label', value: this.filters.label }}
-      this.$api.message.findPage(this.pageRequest).then((res) => {
+      this.$api.message.listMessageBackDTO(this.pageRequest).then((res) => {
         this.pageResult = res.data
       }).then(data != null ? data.callback : '')
     },

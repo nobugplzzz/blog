@@ -21,10 +21,10 @@ export const batchDelete = (data) => {
   })
 }
 // 分页查询
-export const findPage = (data) => {
+export const listMessageBackDTO = (data) => {
   return axios({
-    url: '/message/findPage',
-    method: 'post',
-    data
+    url: '/api/admin/messages',
+    method: 'get',
+    params: data
   })
 }

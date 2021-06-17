@@ -1,86 +1,336 @@
 <template>
-  <div class="container" style="width:99%;margin-top:-15px;">
-    <!--工具栏-->
-    <div class="toolbar" style="float:left;padding-top:10px;padding-left:15px;">
-      <el-form :inline="true" :model="filters" :size="size">
-        <el-form-item>
-          <el-input v-model="filters.label" placeholder="名称" />
-        </el-form-item>
-        <el-form-item>
-          <KtButton icon="fa fa-edit" :label="$t('action.search')" perms="sys:comment:view" type="primary" @click="findPage(null)" />
-        </el-form-item>
-      </el-form>
+  <el-card class="main-card">
+    <div class="title">{{ this.$route.name }}</div>
+    <!-- 表格操作 -->
+    <div class="operation-container">
+      <el-button
+        v-if="isDelete == 0"
+        type="danger"
+        size="small"
+        icon="el-icon-deleteItem"
+        :disabled="commentIdList.length == 0"
+        @click="updateIsDelete = true"
+      >
+        批量删除
+      </el-button>
+      <el-button
+        v-else
+        type="danger"
+        size="small"
+        icon="el-icon-deleteItem"
+        :disabled="commentIdList.length == 0"
+        @click="remove = true"
+      >
+        批量删除
+      </el-button>
+      <!-- 数据筛选 -->
+      <div style="margin-left:auto">
+        <el-select
+          v-model="isDelete"
+          placeholder="请选择"
+          size="small"
+          style="margin-right:1rem"
+        >
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+        <el-input
+          v-model="keywords"
+          prefix-icon="el-icon-search"
+          size="small"
+          placeholder="请输入用户昵称"
+          style="width:200px"
+          @keyup.enter.native="listComments"
+        />
+        <el-button
+          type="primary"
+          size="small"
+          icon="el-icon-search"
+          style="margin-left:1rem"
+          @click="listComments"
+        >
+          搜索
+        </el-button>
+      </div>
     </div>
-    <!--表格内容栏-->
-    <KtTable
-      perms-edit="sys:comment:edit"
-      perms-delete="sys:comment:delete"
-      edit-display-none="display:none;"
-      :data="pageResult"
-      :columns="columns"
-      @findPage="findPage"
-      @handleEdit="handleEdit"
-      @handleDelete="handleDelete"
+    <!-- 表格展示 -->
+    <el-table
+      v-loading="loading"
+      border
+      :data="commentList"
+      @selection-change="selectionChange"
+    >
+      <!-- 表格列 -->
+      <el-table-column type="selection" width="55" />
+      <el-table-column prop="avatar" label="头像" align="center" width="120">
+        <template slot-scope="scope">
+          <img :src="scope.row.avatar" width="40" height="40">
+        </template>
+      </el-table-column>
+      <!-- 评论人昵称 -->
+      <el-table-column
+        prop="nickname"
+        label="评论人"
+        align="center"
+        width="120"
+      />
+      <!-- 回复人昵称 -->
+      <el-table-column
+        prop="replyNickname"
+        label="回复人"
+        align="center"
+        width="120"
+      >
+        <template slot-scope="scope">
+          <span v-if="scope.row.replyNickname">
+            {{ scope.row.replyNickname }}
+          </span>
+          <span v-else>无</span>
+        </template>
+      </el-table-column>
+      <!-- 评论文章标题 -->
+      <el-table-column prop="articleTitle" label="文章标题" align="center">
+        <template slot-scope="scope">
+          <span v-if="scope.row.articleTitle">
+            {{ scope.row.articleTitle }}
+          </span>
+          <span v-else>无</span>
+        </template>
+      </el-table-column>
+      <!-- 评论内容 -->
+      <el-table-column prop="commentContent" label="评论内容" align="center">
+        <template slot-scope="scope">
+          <span class="comment-content" v-html="scope.row.commentContent" />
+        </template>
+      </el-table-column>
+      <!-- 点赞量 -->
+      <el-table-column
+        prop="likeCount"
+        label="点赞量"
+        width="80"
+        align="center"
+      >
+        <template slot-scope="scope">
+          <span v-if="scope.row.likeCount">
+            {{ scope.row.likeCount }}
+          </span>
+          <span v-else>0</span>
+        </template>
+      </el-table-column>
+      <!-- 评论时间 -->
+      <el-table-column
+        prop="createTime"
+        label="评论时间"
+        width="150"
+        align="center"
+      >
+        <template slot-scope="scope">
+          <i class="el-icon-time" style="margin-right:5px" />
+          {{ scope.row.createTime | date }}
+        </template>
+      </el-table-column>
+      <el-table-column label="来源" align="center" width="100">
+        <template slot-scope="scope">
+          <el-tag v-if="scope.row.articleTitle">文章</el-tag>
+          <el-tag v-else type="warning">友链</el-tag>
+        </template>
+      </el-table-column>
+      <!-- 列操作 -->
+      <el-table-column label="操作" width="160" align="center">
+        <template slot-scope="scope">
+          <el-popconfirm
+            v-if="scope.row.isDelete == 0"
+            title="确定删除吗？"
+            @onConfirm="updateCommentStatus(scope.row.id)"
+          >
+            <el-button slot="reference" size="mini" type="danger">
+              删除
+            </el-button>
+          </el-popconfirm>
+          <el-popconfirm
+            v-if="scope.row.isDelete == 1"
+            title="确定恢复吗？"
+            @onConfirm="updateCommentStatus(scope.row.id)"
+          >
+            <el-button slot="reference" size="mini" type="success">
+              恢复
+            </el-button>
+          </el-popconfirm>
+          <el-popconfirm
+            v-if="scope.row.isDelete == 1"
+            style="margin-left:10px"
+            title="确定彻底删除吗？"
+            @onConfirm="deleteComments(scope.row.id)"
+          >
+            <el-button slot="reference" size="mini" type="danger">
+              删除
+            </el-button>
+          </el-popconfirm>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <el-pagination
+      class="pagination-container"
+      background
+      :current-page="current"
+      :page-size="size"
+      :total="count"
+      :page-sizes="[10, 20]"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="sizeChange"
+      @current-change="currentChange"
     />
-  </div>
+    <!-- 批量删除对话框 -->
+    <el-dialog :visible.sync="updateIsDelete" width="30%">
+      <div slot="title" class="dialog-title-container">
+        <i class="el-icon-warning" style="color:#ff9900" />提示
+      </div>
+      <div style="font-size:1rem">是否删除选中项？</div>
+      <div slot="footer">
+        <el-button @click="updateIsDelete = false">取 消</el-button>
+        <el-button type="primary" @click="updateCommentStatus(null)">
+          确 定
+        </el-button>
+      </div>
+    </el-dialog>
+    <!-- 批量彻底删除对话框 -->
+    <el-dialog :visible.sync="remove" width="30%">
+      <div slot="title" class="dialog-title-container">
+        <i class="el-icon-warning" style="color:#ff9900" />提示
+      </div>
+      <div style="font-size:1rem">是否彻底删除选中项？</div>
+      <div slot="footer">
+        <el-button @click="remove = false">取 消</el-button>
+        <el-button type="primary" @click="deleteComments(null)">
+          确 定
+        </el-button>
+      </div>
+    </el-dialog>
+  </el-card>
 </template>
 
 <script>
-import KtTable from '@/views/Core/KtTable'
-import KtButton from '@/views/Core/KtButton'
-import { format } from '@/utils/datetime'
-
 export default {
-  components: {
-    KtTable,
-    KtButton
-  },
-  data() {
+  data: function() {
     return {
-      size: 'small',
-      filters: {
-        label: ''
-      },
-      columns: [
-        { prop: 'id', label: 'ID', minWidth: 50 },
-        { prop: 'avatar', label: '头像', minWidth: 100 },
-        { prop: 'username', label: '评论人', minWidth: 100 },
-        { prop: 'replayUsername', label: '回复人', minWidth: 100 },
-        { prop: 'articleTitle', label: '文章标题', minWidth: 100 },
-        { prop: 'content', label: '评论内容', minWidth: 100 },
-        { prop: 'likeCount', label: '点赞量', minWidth: 80 },
-        { prop: 'source', label: '来源', minWidth: 120 },
-        { prop: 'createTime', label: '评论时间', minWidth: 120 }
-        // {prop:"lastUpdateBy", label:"更新人", minWidth:100},
-        // {prop:"lastUpdateTime", label:"更新时间", minWidth:120, formatter:this.dateFormat}
+      loading: true,
+      remove: false,
+      updateIsDelete: false,
+      options: [
+        {
+          value: 0,
+          label: '正常'
+        },
+        {
+          value: 1,
+          label: '回收站'
+        }
       ],
-      pageRequest: { pageNum: 1, pageSize: 8 },
-      pageResult: {}
+      commentList: [],
+      commentIdList: [],
+      keywords: null,
+      isDelete: 0,
+      current: 1,
+      size: 10,
+      count: 0
     }
   },
+  watch: {
+    isDelete() {
+      this.listComments()
+    }
+  },
+  created() {
+    this.listComments()
+  },
   methods: {
-    // 获取分页数据
-    findPage: function(data) {
-      if (data !== null) {
-        this.pageRequest = data.pageRequest
+    selectionChange(commentList) {
+      this.commentIdList = []
+      commentList.forEach(item => {
+        this.commentIdList.push(item.id)
+      })
+    },
+    sizeChange(size) {
+      this.size = size
+      this.listComments()
+    },
+    currentChange(current) {
+      this.current = current
+      this.listComments()
+    },
+    updateCommentStatus(id) {
+      const param = new URLSearchParams()
+      if (id != null) {
+        param.append('idList', [id])
+      } else {
+        param.append('idList', this.commentIdList)
       }
-      this.pageRequest.columnFilters = { label: { name: 'label', value: this.filters.label }}
-      this.$api.comment.findPage(this.pageRequest).then((res) => {
-        this.pageResult = res.data
-      }).then(data != null ? data.callback : '')
+      param.append('isDelete', this.isDelete === 0 ? 1 : 0)
+      this.axios.put('/api/admin/comments', param).then(({ data }) => {
+        if (data.flag) {
+          this.$notify.success({
+            title: '成功',
+            message: data.message
+          })
+          this.listComments()
+        } else {
+          this.$notify.error({
+            title: '失败',
+            message: data.message
+          })
+        }
+        this.updateIsDelete = false
+      })
     },
-    // 批量删除
-    handleDelete: function(data) {
-      this.$api.comment.batchDelete(data.params).then(data != null ? data.callback : '')
+    deleteComments(id) {
+      var param = {}
+      if (id == null) {
+        param = { data: this.commentIdList }
+      } else {
+        param = { data: [id] }
+      }
+      this.$api.comment.listCommentBackDTO(param).then((res) => {
+        if (res.flag) {
+          this.$notify.success({
+            title: '成功',
+            message: res.message
+          })
+          this.listComments()
+        } else {
+          this.$notify.error({
+            title: '失败',
+            message: res.message
+          })
+        }
+        this.remove = false
+      })
     },
-    // 时间格式化
-    dateFormat: function(row, column, cellValue, index) {
-      return format(row[column.property])
+    listComments() {
+      this.$api.comment.listCommentBackDTO({
+
+        current: this.current,
+        size: this.size,
+        keywords: this.keywords,
+        isDeleted: this.isDelete
+
+      })
+        .then((res) => {
+          this.commentList = res.data.recordList
+          this.count = res.data.count
+          this.loading = false
+        })
     }
   }
 }
 </script>
 
 <style scoped>
-
+.comment-content {
+  display: inline-block;
+}
 </style>

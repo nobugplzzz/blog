@@ -222,7 +222,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public List<ArticleHomeDTO> listArticles(Long current) {
         // 转换页码
-        Long c=(current-1)*10;
+        Long c = (current - 1) * 10;
         List<ArticleHomeDTO> articleHomeDTOList = articleMapper.listArticles(c);
         return articleHomeDTOList;
     }
@@ -272,6 +272,31 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 .orderByDesc(Article::getId)
                 .last("limit 5"));
         return BeanCopyUtil.copyList(articleList, ArticleRecommendDTO.class);
+    }
+
+    @Override
+    public ArticlePreviewListDTO listArticlesByCondition(ConditionVO conditionVO) {
+        // 转换页码
+        conditionVO.setCurrent((conditionVO.getCurrent() - 1) * 9);
+        // 搜索条件对应数据
+        List<ArticlePreviewDTO> articlePreviewDTOList = articleMapper.listArticlesByCondition(conditionVO);
+        // 搜索条件对应名(标签或分类名)
+        String name;
+        if (Objects.nonNull(conditionVO.getCategoryId())) {
+            name = categoryMapper.selectOne(new LambdaQueryWrapper<Category>()
+                    .select(Category::getCategoryName)
+                    .eq(Category::getId, conditionVO.getCategoryId()))
+                    .getCategoryName();
+        } else {
+            name = tagMapper.selectOne(new LambdaQueryWrapper<Tag>()
+                    .select(Tag::getName)
+                    .eq(Tag::getId, conditionVO.getTagId()))
+                    .getName();
+        }
+        return ArticlePreviewListDTO.builder()
+                .articlePreviewDTOList(articlePreviewDTOList)
+                .name(name)
+                .build();
     }
 }
 

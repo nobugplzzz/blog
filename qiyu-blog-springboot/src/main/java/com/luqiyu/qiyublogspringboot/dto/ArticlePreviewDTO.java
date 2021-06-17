@@ -6,22 +6,23 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 /**
- * 文章传输对象，用于文章页面推荐文章展示
+ * 文章传输对象，用于分类或标签下的文章
  *
  * @author: 启誉
- * @create: 2021-06-16
+ * @create: 2021-06-17
  **/
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class ArticleRecommendDTO {
+public class ArticlePreviewDTO {
     /**
-     * id
+     * 文章id
      */
-    private Long id;
+    private Integer id;
 
     /**
      * 文章缩略图
@@ -34,7 +35,22 @@ public class ArticleRecommendDTO {
     private String articleTitle;
 
     /**
-     * 创建时间
+     * 发表时间
      */
     private Date createTime;
+
+    /**
+     * 文章分类id
+     */
+    private Integer categoryId;
+
+    /**
+     * 文章分类名
+     */
+    private String categoryName;
+
+    /**
+     * 文章标签
+     */
+    private List<TagDTO> tagDTOList;
 }

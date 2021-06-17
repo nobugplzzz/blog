@@ -129,4 +129,9 @@ public class BlogInfoSerciveImpl implements BlogInfoService {
                 .build();
     }
 
+    @Override
+    public String getAbout() {
+        return null;
+    }
+
 }

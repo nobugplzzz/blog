@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luqiyu.qiyublogspringboot.mapper.CommentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.luqiyu.qiyublogspringboot.entity.Comment">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="article_id" property="articleId" />
+        <result column="comment_content" property="commentContent" />
+        <result column="create_time" property="createTime" />
+        <result column="reply_id" property="replyId" />
+        <result column="parent_id" property="parentId" />
+        <result column="is_delete" property="isDelete" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id, article_id, comment_content, create_time, reply_id, parent_id, is_delete
+    </sql>
+
+
+    <select id="listCommentBackDTO" resultType="com.luqiyu.qiyublogspringboot.dto.CommentBackDTO">
+        SELECT
+        c.id,
+        u.avatar,
+        u.nickname,
+        r.nickname AS reply_nickname,
+        a.article_title,
+        c.comment_content,
+        c.create_time,
+        c.is_delete
+        FROM
+        comment c
+        LEFT JOIN article a ON c.article_id = a.id
+        LEFT JOIN user_info u ON c.user_id = u.id
+        LEFT JOIN user_info r ON c.reply_id = r.id
+        <where>
+            c.is_delete = #{condition.isDeleted}
+            <if test="condition.keywords != null">
+                and u.nickname like concat('%',#{condition.keywords},'%')
+            </if>
+        </where>
+        ORDER BY
+        create_time DESC
+        LIMIT #{condition.current},#{condition.size}
+    </select>
+
+    <select id="countCommentDTO" resultType="java.lang.Integer">
+        SELECT
+        count(1)
+        from
+        comment c
+        LEFT JOIN user_info u ON c.user_id = u.id
+        <where>
+            c.is_delete = #{condition.isDeleted}
+            <if test="condition.keywords != null">
+                and u.nickname like concat('%',#{condition.keywords},'%')
+            </if>
+        </where>
+    </select>
+</mapper>

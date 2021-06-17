@@ -34,4 +34,14 @@ public class CommonConst {
      * 博主id
      */
     public static final int BLOGGER_ID = 1;
+
+    /**
+     * 删除操作
+     */
+    public static final String REMOVE = "删除";
+
+    /**
+     * 修改操作
+     */
+    public static final String UPDATE = "修改";
 }
