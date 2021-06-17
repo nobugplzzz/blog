@@ -4,19 +4,20 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.luqiyu.qiyublogspringboot.entity.Comment">
-        <id column="id" property="id" />
-        <result column="user_id" property="userId" />
-        <result column="article_id" property="articleId" />
-        <result column="comment_content" property="commentContent" />
-        <result column="create_time" property="createTime" />
-        <result column="reply_id" property="replyId" />
-        <result column="parent_id" property="parentId" />
-        <result column="is_delete" property="isDelete" />
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="article_id" property="articleId"/>
+        <result column="comment_content" property="commentContent"/>
+        <result column="create_time" property="createTime"/>
+        <result column="reply_id" property="replyId"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="is_delete" property="isDelete"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, user_id, article_id, comment_content, create_time, reply_id, parent_id, is_delete
+        id
+        , user_id, article_id, comment_content, create_time, reply_id, parent_id, is_delete
     </sql>
 
 
@@ -58,5 +59,124 @@
                 and u.nickname like concat('%',#{condition.keywords},'%')
             </if>
         </where>
+    </select>
+
+    <select id="listComments" resultType="com.luqiyu.qiyublogspringboot.dto.CommentDTO">
+        SELECT
+        u.nickname,
+        u.avatar,
+        u.web_site,
+        c.user_id,
+        c.id,
+        c.comment_content,
+        c.create_time
+        FROM
+        comment c
+        JOIN user_info u ON c.user_id = u.id
+        WHERE
+        <if test="articleId != null">
+            article_id = #{articleId}
+        </if>
+        <if test="articleId == null">
+            article_id is NULL
+        </if>
+        AND c.is_delete = 0
+        AND parent_id IS NULL
+        ORDER BY
+        create_time DESC
+        LIMIT #{current},10
+    </select>
+
+    <select id="listReplies" resultType="com.luqiyu.qiyublogspringboot.dto.ReplyDTO">
+        -- 再加序号
+        SELECT
+        @row_number :=
+        IF
+        ( @parent_id_no = parent_id, @row_number + 1, 1 ) AS row_num,
+        @parent_id_no := parent_id AS parent_id,
+        a.user_id,
+        a.reply_id,
+        a.id,
+        a.parent_id,
+        a.comment_content,
+        a.create_time,
+        a.nickname,
+        a.avatar,
+        a.web_site,
+        a.reply_nickname,
+        a.reply_web_site
+        FROM
+        (
+        -- 	先分组
+        SELECT
+        c.user_id,
+        c.reply_id,
+        c.id,
+        c.parent_id,
+        c.comment_content,
+        c.create_time,
+        u.nickname,
+        u.avatar,
+        u.web_site,
+        r.nickname AS reply_nickname,
+        r.web_site AS reply_web_site
+        FROM
+        `comment` c
+        -- join 两次user_info表目的是查询评论用户信息，查询回复用户信息
+        JOIN user_info u ON c.user_id = u.id
+        JOIN user_info r ON c.reply_id = r.id
+        WHERE
+        c.is_delete = 0 -- 	按照父id分组显示评论
+        AND parent_id IN
+        (
+        <foreach collection="commentIdList" item="commentId" separator=",">
+            #{commentId}
+        </foreach>
+        )
+        GROUP BY
+        parent_id,
+        id
+        ) a
+
+    </select>
+
+    <select id="listReplyCountByCommentId" resultType="com.luqiyu.qiyublogspringboot.dto.ReplyCountDTO">
+        SELECT
+        parent_id as comment_id,
+        count(1) AS reply_count
+        FROM
+        comment
+        WHERE
+        is_delete = 0
+        AND
+        parent_id IN
+        (
+        <foreach collection="commentIdList" item="commentId" separator=",">
+            #{commentId}
+        </foreach>
+        )
+        GROUP BY
+        parent_id
+    </select>
+
+    <select id="listRepliesByCommentId" resultType="com.luqiyu.qiyublogspringboot.dto.ReplyDTO">
+        SELECT c.user_id,
+               u.nickname,
+               u.avatar,
+               u.web_site,
+               c.reply_id,
+               r.nickname as reply_nickname,
+               r.web_site as reply_web_site,
+               c.id,
+               c.parent_id,
+               c.comment_content,
+               c.create_time
+        FROM comment c
+                 JOIN user_info u ON c.user_id = u.id
+                 JOIN user_info r ON c.reply_id = r.id
+        WHERE c.is_delete = 0
+          AND parent_id = #{commentId}
+        ORDER BY create_time ASC
+            LIMIT #{current}, 5
     </select>
 </mapper>
