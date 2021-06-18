@@ -23,6 +23,6 @@ public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler {
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         response.setContentType("application/json;charset=utf-8");
-        response.getWriter().write(JSON.toJSONString(new Result(false, StatusCodeConst.OK,"注销成功")));
+        response.getWriter().write(JSON.toJSONString(new Result(true, StatusCodeConst.OK,"注销成功")));
     }
 }

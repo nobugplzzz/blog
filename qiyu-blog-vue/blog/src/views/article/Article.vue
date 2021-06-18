@@ -298,7 +298,8 @@ export default {
       wordNum: "",
       readTime: "",
       articleHref: window.location.href,
-      clipboard: null
+      clipboard: null,
+      resetCurrent: null
     };
   },
   methods: {

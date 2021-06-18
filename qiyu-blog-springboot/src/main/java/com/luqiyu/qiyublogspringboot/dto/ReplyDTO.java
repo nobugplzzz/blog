@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
- * 回复评论列表传输对象，用于前台查询评论DTO的属性
+ * 回复评论的传输对象，用于前台查询评论的回复评论，此回复评论也可回复，因此多了replyXX等被回复用户相关属性
  *
  * @author: 启誉
  * @create: 2021-06-17

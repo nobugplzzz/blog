@@ -33,7 +33,7 @@
               <i class="iconfont iconbiaoqing" />
             </span>
             <button
-              @click="insertComment"
+              @click="insertComment()"
               class="upload-btn v-comment-btn"
               style="margin-left:auto"
             >
@@ -48,7 +48,7 @@
     <!-- 评论详情 -->
     <div v-if="count > 0 && reFresh">
       <!-- 评论数量 -->
-      <div class="count">{{ count }} 评论</div>
+      <div class="count">共 {{ count }} 条评论</div>
       <!-- 评论列表 -->
       <div
         style="display:flex"
@@ -126,7 +126,7 @@
               </div>
               <!-- 回复内容 -->
               <p class="comment-content">
-                <!-- 回复用户名 -->
+                <!-- 显示被回复用户名 -->
                 <template v-if="reply.replyId != item.userId">
                   <span v-if="!reply.replyWebSite" class="ml-1">
                     @{{ reply.replyNickname }}
@@ -185,7 +185,11 @@
       </div>
       <!-- 加载按钮 -->
       <div class="load-wrapper">
-        <v-btn outlined v-if="count > commentList.length" @click="listComments">
+        <v-btn
+          outlined
+          v-if="count > commentList.length"
+          @click="listComments()"
+        >
           加载更多...
         </v-btn>
       </div>
@@ -310,6 +314,8 @@ export default {
         if (data.flag) {
           //查询最新评论
           this.$emit("reloadComment");
+          // 重置页码
+          this.current = 1;
           this.$toast({ type: "success", message: data.message });
         } else {
           this.$toast({ type: "error", message: data.message });

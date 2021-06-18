@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 评论传输对象，用于前台查询评论
+ * 评论传输对象，用于前台查询评论，包括子评论replyDTOList
  *
  * @author: 启誉
  * @create: 2021-06-17

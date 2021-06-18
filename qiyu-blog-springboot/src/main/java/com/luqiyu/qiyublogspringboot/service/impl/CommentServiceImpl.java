@@ -93,7 +93,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         List<ReplyDTO> replyDTOList = commentMapper.listReplies(commentIdList);
         // 封装回复点赞量
 //        replyDTOList.forEach(item -> item.setLikeCount(Objects.requireNonNull(likeCountMap).get(item.getId().toString())));
-        // 根据评论id分组回复数据
+        // 根据评论id分组回复数据？？？？？？？？？？？方便封装进对应父评论，因为sql只是查出所有的评论和所有的回复评论，还需要处理
         Map<Integer, List<ReplyDTO>> replyMap = replyDTOList.stream().collect(Collectors.groupingBy(ReplyDTO::getParentId));
         // 根据评论id查询回复量
         Map<Integer, Integer> replyCountMap = commentMapper.listReplyCountByCommentId(commentIdList)
