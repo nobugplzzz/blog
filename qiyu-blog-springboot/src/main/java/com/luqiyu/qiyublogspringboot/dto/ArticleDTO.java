@@ -40,15 +40,15 @@ public class ArticleDTO {
      */
     private String articleContent;
 
-//    /**
-//     * 点赞量
-//     */
-//    private Integer likeCount;
+    /**
+     * 点赞量
+     */
+    private Integer likeCount;
 
-//    /**
-//     * 浏览量
-//     */
-//    private Integer viewsCount;
+    /**
+     * 浏览量
+     */
+    private Integer viewsCount;
 
     /**
      * 发表时间

@@ -30,4 +30,22 @@ public interface BlogInfoService {
      * @return 关于我内容
      */
     String getAbout();
+
+    /**
+     * 修改关于我内容
+     * @param aboutContent 关于我内容
+     */
+    void updateAbout(String aboutContent);
+
+    /**
+     * 修改公告
+     * @param notice 公告
+     */
+    void updateNotice(String notice);
+
+    /**
+     * 后台查看公告
+     * @return 公告
+     */
+    String getNotice();
 }

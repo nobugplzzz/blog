@@ -111,4 +111,11 @@ public interface ArticleService extends IService<Article> {
      * @return
      */
     ArticlePreviewListDTO listArticlesByCondition(ConditionVO conditionVO);
+
+    /**
+     * 点赞文章
+     *
+     * @param articleId 文章id
+     */
+    void saveArticleLike(Integer articleId);
 }

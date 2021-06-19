@@ -119,5 +119,12 @@ public class ArticleController {
         return new Result<>(true, StatusCodeConst.OK, "查询成功", articleService.listNewestArticles());
     }
 
+    @ApiOperation(value = "点赞文章")
+    @ApiImplicitParam(name = "articleId", value = "文章id", required = true, dataType = "Integer")
+    @PostMapping("/articles/like")
+    public Result saveArticleLike(Integer articleId) {
+        articleService.saveArticleLike(articleId);
+        return new Result<>(true, StatusCodeConst.OK, "点赞成功");
+    }
 }
 

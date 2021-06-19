@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.luqiyu.qiyublogspringboot.constant.CommonConst;
+import com.luqiyu.qiyublogspringboot.constant.RedisPrefixConst;
 import com.luqiyu.qiyublogspringboot.dto.*;
 import com.luqiyu.qiyublogspringboot.entity.Comment;
 import com.luqiyu.qiyublogspringboot.mapper.CommentMapper;
@@ -16,9 +17,11 @@ import com.luqiyu.qiyublogspringboot.vo.CommentVO;
 import com.luqiyu.qiyublogspringboot.vo.ConditionVO;
 import com.luqiyu.qiyublogspringboot.vo.DeleteVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,9 +38,11 @@ import java.util.stream.Collectors;
 public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentService {
 
     @Autowired
-    CommentMapper commentMapper;
+    private CommentMapper commentMapper;
     @Autowired
-    UserInfoMapper userInfoMapper;
+    private UserInfoMapper userInfoMapper;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Override
     public PageDTO<CommentBackDTO> listCommentBackDTO(ConditionVO condition) {
@@ -81,18 +86,18 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         // 分页查询评论集合
         List<CommentDTO> commentDTOList = commentMapper.listComments(articleId, (current - 1) * 10);
         // 查询redis的评论点赞数据
-//        Map<String, Integer> likeCountMap = (Map<String, Integer>) redisTemplate.boundHashOps(COMMENT_LIKE_COUNT).entries();
+        Map<String, Integer> likeCountMap = (Map<String, Integer>) redisTemplate.boundHashOps(RedisPrefixConst.COMMENT_LIKE_COUNT).entries();
         // 提取评论id集合
         List<Integer> commentIdList = new ArrayList<>();
         // 封装评论点赞量
         commentDTOList.forEach(item -> {
             commentIdList.add(item.getId());
-//            item.setLikeCount(Objects.requireNonNull(likeCountMap).get(item.getId().toString()));
+            item.setLikeCount(Objects.requireNonNull(likeCountMap).get(item.getId().toString()));
         });
         // 根据评论id集合查询回复数据
         List<ReplyDTO> replyDTOList = commentMapper.listReplies(commentIdList);
         // 封装回复点赞量
-//        replyDTOList.forEach(item -> item.setLikeCount(Objects.requireNonNull(likeCountMap).get(item.getId().toString())));
+        replyDTOList.forEach(item -> item.setLikeCount(Objects.requireNonNull(likeCountMap).get(item.getId().toString())));
         // 根据评论id分组回复数据？？？？？？？？？？？方便封装进对应父评论，因为sql只是查出所有的评论和所有的回复评论，还需要处理
         Map<Integer, List<ReplyDTO>> replyMap = replyDTOList.stream().collect(Collectors.groupingBy(ReplyDTO::getParentId));
         // 根据评论id查询回复量
@@ -128,16 +133,39 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         // 转换页码查询评论下的回复
         List<ReplyDTO> replyDTOList = commentMapper.listRepliesByCommentId(commentId, (current - 1) * 5);
         // 查询redis的评论点赞数据
-//        Map<String, Integer> likeCountMap = (Map<String, Integer>) redisTemplate.boundHashOps(COMMENT_LIKE_COUNT).entries();
+        Map<Integer,Integer> likeCountMap = redisTemplate.boundHashOps(RedisPrefixConst.COMMENT_LIKE_COUNT).entries();
         // 封装点赞数据
-//        replyDTOList.forEach(item -> item.setLikeCount(Objects.requireNonNull(likeCountMap).get(item.getId().toString())));
+        replyDTOList.forEach(item->{
+            item.setLikeCount(Objects.requireNonNull(likeCountMap).get(item.getId().toString()));
+        });
         return replyDTOList;
 
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveCommentLike(Integer commentId) {
+        // 查询当前用户点赞过的评论id集合
+        Object object = redisTemplate.boundHashOps(RedisPrefixConst.COMMENT_USER_LIKE).get(UserUtil.getLoginUser().getUserInfoId().toString());
+        // 强转Set，不允许重复
+        Set<Integer> commentLikeSet=(Set<Integer>)object;
+        // 第一次点赞则创建
+        if (CollectionUtils.isEmpty(commentLikeSet)){
+            commentLikeSet=new HashSet<>();
+        }
+        // 判断是否已经点赞
+        if (commentLikeSet.contains(commentId)){
+            // 已经点赞则删除评论id
+            commentLikeSet.remove(commentId);
+            // 评论点赞量-1
+            redisTemplate.boundHashOps( RedisPrefixConst.COMMENT_LIKE_COUNT).increment(commentId.toString(),-1);
+        }else{
+            // 评论点赞量+1
+            redisTemplate.boundHashOps( RedisPrefixConst.COMMENT_LIKE_COUNT).increment(commentId.toString(),1);
 
+        }
+        // 保存点赞记录
+        redisTemplate.boundHashOps(RedisPrefixConst.COMMENT_USER_LIKE).put(commentId.toString(),commentLikeSet);
     }
 
     /**

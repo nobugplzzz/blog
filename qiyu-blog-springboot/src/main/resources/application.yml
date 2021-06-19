@@ -41,7 +41,12 @@ spring:
     maxPoolPreparedStatementPerConnectionSize: 20
     useGlobalDataSourceStat: true
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+  # 配置redis
+  redis:
+    host: 192.168.89.128
+    port: 6379
 
-#mybatis-plus.mapper-locations,解决报错找不到mapper的某个方法
+# mybatis-plus.mapper-locations,解决报错找不到mapper的某个方法
 mybatis-plus:
   mapper-locations: classpath*:/com/luqiyu/qiyublogspringboot/mapper/xml/**Mapper.xml
+

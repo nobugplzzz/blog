@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.luqiyu.qiyublogspringboot.constant.CommonConst;
+import com.luqiyu.qiyublogspringboot.constant.RedisPrefixConst;
 import com.luqiyu.qiyublogspringboot.dto.*;
 import com.luqiyu.qiyublogspringboot.entity.Article;
 import com.luqiyu.qiyublogspringboot.entity.ArticleTag;
@@ -17,15 +18,20 @@ import com.luqiyu.qiyublogspringboot.service.ArticleService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.luqiyu.qiyublogspringboot.service.ArticleTagService;
 import com.luqiyu.qiyublogspringboot.util.BeanCopyUtil;
+import com.luqiyu.qiyublogspringboot.util.UserUtil;
 import com.luqiyu.qiyublogspringboot.vo.ArticleVO;
 import com.luqiyu.qiyublogspringboot.vo.ConditionVO;
 import com.luqiyu.qiyublogspringboot.vo.LogicDeleteVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import javax.servlet.http.HttpSession;
+import java.beans.Transient;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -40,17 +46,21 @@ import java.util.stream.Collectors;
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
 
     @Autowired
-    ArticleMapper articleMapper;
+    private ArticleMapper articleMapper;
     @Autowired
-    ArticleTagMapper articleTagMapper;
+    private ArticleTagMapper articleTagMapper;
     @Autowired
-    CategoryMapper categoryMapper;
+    private CategoryMapper categoryMapper;
     @Autowired
-    TagMapper tagMapper;
+    private TagMapper tagMapper;
     @Autowired
-    ArticleService articleService;
+    private ArticleService articleService;
     @Autowired
-    ArticleTagService articleTagService;
+    private ArticleTagService articleTagService;
+    @Autowired
+    private RedisTemplate redisTemplate;
+    @Autowired
+    private HttpSession session;
 
     @Override
     public PageDTO<ArticleBackDTO> listArticleBackDTO(ConditionVO condition) {
@@ -66,7 +76,15 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
         // 分页，不使用Page对象，因为不使用mp的selectPage方法
         List<ArticleBackDTO> articleBackDTOList = articleMapper.listArticleBacks(condition);
-
+        // 查询文章点赞量和浏览量,entries()获取map中的键值对
+        Map<String,Integer> likeCountMap = redisTemplate.boundHashOps(RedisPrefixConst.ARTICLE_LIKE_COUNT).entries();
+        Map<String,Integer> viewCountMap = redisTemplate.boundHashOps(RedisPrefixConst.ARTICLE_VIEWS_COUNT).entries();
+        // Iterable接口的forEach方法
+        articleBackDTOList.forEach((item)->{
+            // Objects.requireNonNull要求不能传null值
+            item.setLikeCount(Objects.requireNonNull(likeCountMap).get(item.getId().toString()));
+            item.setViewsCount(Objects.requireNonNull(viewCountMap).get(item.getId().toString()));
+        });
         return new PageDTO<>(articleBackDTOList, count);
     }
 
@@ -133,7 +151,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public ArticleOptionDTO listArticleOptionDTO() {
         // 查询新建/编辑文章选项
-
         // 先查询，再复制属性
         List<Category> categoryList = categoryMapper.selectList(new LambdaQueryWrapper<Category>()
                 .select(Category::getId, Category::getCategoryName));
@@ -230,7 +247,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public ArticleDTO getArticleById(Integer articleId) {
         // 更新文章浏览量
-//        updateArticleViewsCount(articleId);
+        updateArticleViewsCount(articleId);
         // 查询id对应的文章
         ArticleDTO articleDTO = articleMapper.getArticleById(articleId);
         // 查询上一篇下一篇文章
@@ -256,8 +273,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         // 查询相关推荐文章
         articleDTO.setArticleRecommendList(articleMapper.listArticleRecommends(articleId));
         // 封装点赞量和浏览量
-//        article.setViewsCount((Integer) redisTemplate.boundHashOps(ARTICLE_VIEWS_COUNT).get(articleId.toString()));
-//        article.setLikeCount((Integer) redisTemplate.boundHashOps(ARTICLE_LIKE_COUNT).get(articleId.toString()));
+        articleDTO.setViewsCount((Integer) redisTemplate.boundHashOps(RedisPrefixConst.ARTICLE_VIEWS_COUNT).get(articleId.toString()));
+        articleDTO.setLikeCount((Integer) redisTemplate.boundHashOps(RedisPrefixConst.ARTICLE_LIKE_COUNT).get(articleId.toString()));
 
         return articleDTO;
     }
@@ -297,6 +314,65 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 .articlePreviewDTOList(articlePreviewDTOList)
                 .name(name)
                 .build();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void saveArticleLike(Integer articleId) {
+        // 查询当前用户点赞过的文章id集合
+        // 文章id集合的key是userInfoId,所以get(userInfoId),这个map的key是ARTICLE_USER_LIKE
+        // redisTemplate的Hash类型(key-map)操作,根据key获取值,boundHashOps(K key).get(K key)
+        Object object = redisTemplate.boundHashOps(RedisPrefixConst.ARTICLE_USER_LIKE)
+                .get(UserUtil.getLoginUser().getUserInfoId().toString());
+        // 强转Set，作用是存储不重复的元素
+        Set<Integer> articleLikeSet = (Set<Integer>) object;
+
+        // 第一次点赞则创建
+        if (CollectionUtils.isEmpty(articleLikeSet)) {
+            articleLikeSet = new HashSet<>();
+        }
+
+        // 判断是否点赞
+        if (articleLikeSet.contains(articleId)) {
+            // 点过赞则删除文章id
+            articleLikeSet.remove(articleId);
+            // 文章点赞量-1
+            redisTemplate.boundHashOps(RedisPrefixConst.ARTICLE_LIKE_COUNT)
+                    .increment(articleId.toString(), -1);
+        }else{
+            // 未点赞则增加文章id
+            articleLikeSet.add(articleId);
+            // 文章点赞量+1
+            redisTemplate.boundHashOps(RedisPrefixConst.ARTICLE_LIKE_COUNT)
+                    .increment(articleId.toString(), 1);
+        }
+        // 保存点赞记录
+        redisTemplate.boundHashOps(RedisPrefixConst.ARTICLE_USER_LIKE)
+                .put(UserUtil.getLoginUser().getUserInfoId().toString(),articleLikeSet);
+    }
+
+    /**
+     * 更新文章浏览量
+     *
+     * @param articleId 文章id
+     */
+    @Async
+    public void updateArticleViewsCount(Integer articleId) {
+        // 判断是否第一次访问，增加浏览量
+        // 获取HttpSession属性判断
+        Object object = session.getAttribute("articleSet");
+        // 强转Set，不允许重复
+        Set<Integer> set = (Set<Integer>) object;
+        //  判断是否第一次访问
+        if (Objects.isNull(set)){
+            set=new HashSet<>();
+        }
+        if(!set.contains(articleId)){
+            set.add(articleId);
+            session.setAttribute("articleSet",set);
+            // 浏览量+1
+            redisTemplate.boundHashOps(RedisPrefixConst.ARTICLE_VIEWS_COUNT).increment(articleId.toString(),1);
+        }
     }
 }
 

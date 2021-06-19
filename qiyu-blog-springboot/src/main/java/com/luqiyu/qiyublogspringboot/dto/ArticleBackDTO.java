@@ -14,6 +14,8 @@ import java.util.List;
  * @create: 2021-06-02
  **/
 @Getter // 对象 to json
+@Setter
+@Builder
 public class ArticleBackDTO {
 
     /**
@@ -25,17 +27,6 @@ public class ArticleBackDTO {
      * 标题
      */
     private String articleTitle;
-
-
-    /**
-     * 点赞量
-     */
-    private Integer likeCount;
-
-    /**
-     * 浏览量
-     */
-    private Integer viewsCount;
 
     /**
      * 是否置顶 0否 1是
@@ -67,9 +58,18 @@ public class ArticleBackDTO {
      */
     private String categoryName;
 
-
     /**
      * 文章标签，需要多表查询
      */
     private List<TagDTO> tagDTOList;
+
+    /**
+     * 点赞量
+     */
+    private Integer likeCount;
+
+    /**
+     * 浏览量
+     */
+    private Integer viewsCount;
 }
