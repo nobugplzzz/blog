@@ -22,7 +22,14 @@ import com.luqiyu.qiyublogspringboot.util.UserUtil;
 import com.luqiyu.qiyublogspringboot.vo.ArticleVO;
 import com.luqiyu.qiyublogspringboot.vo.ConditionVO;
 import com.luqiyu.qiyublogspringboot.vo.LogicDeleteVO;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -61,6 +68,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     private RedisTemplate redisTemplate;
     @Autowired
     private HttpSession session;
+    @Autowired
+    private ElasticsearchRestTemplate elasticsearchRestTemplate;
+
 
     @Override
     public PageDTO<ArticleBackDTO> listArticleBackDTO(ConditionVO condition) {
@@ -351,6 +361,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 .put(UserUtil.getLoginUser().getUserInfoId().toString(),articleLikeSet);
     }
 
+    @Override
+    public List<ArticleSearchDTO> listArticlesBySearch(ConditionVO condition) {
+        return searchArticle(buildQuery(condition));
+    }
+
     /**
      * 更新文章浏览量
      *
@@ -373,6 +388,69 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             // 浏览量+1
             redisTemplate.boundHashOps(RedisPrefixConst.ARTICLE_VIEWS_COUNT).increment(articleId.toString(),1);
         }
+    }
+
+    /**
+     * 搜索文章构造
+     *
+     * @param condition 条件
+     * @return es条件构造器
+     */
+    private NativeSearchQueryBuilder buildQuery(ConditionVO condition) {
+        // 条件构造器，构造查询条件，类似mp的条件构造器
+        NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder();
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        // 根据关键词搜索文章标题或内容
+        if (Objects.nonNull(condition.getKeywords())) {
+            boolQueryBuilder.must(QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("articleTitle", condition.getKeywords()))
+                    .should(QueryBuilders.matchQuery("articleContent", condition.getKeywords())))
+                    .must(QueryBuilders.termQuery("isDeleted", CommonConst.FALSE));
+        }
+        // 查询
+        nativeSearchQueryBuilder.withQuery(boolQueryBuilder);
+        return nativeSearchQueryBuilder;
+    }
+
+    /**
+     * 文章搜索结果高亮
+     *
+     * @param nativeSearchQueryBuilder es条件构造器
+     * @return 搜索结果
+     */
+    private List<ArticleSearchDTO> searchArticle(NativeSearchQueryBuilder nativeSearchQueryBuilder) {
+        // 添加文章标题高亮
+        HighlightBuilder.Field titleField = new HighlightBuilder.Field("articleTitle");
+        titleField.preTags("<span style='color:#f47466'>");
+        titleField.postTags("</span>");
+        // 添加文章内容高亮
+        HighlightBuilder.Field contentField = new HighlightBuilder.Field("articleContent");
+        contentField.preTags("<span style='color:#f47466'>");
+        contentField.postTags("</span>");
+        contentField.fragmentSize(200);
+        nativeSearchQueryBuilder.withHighlightFields(titleField, contentField);
+        // 搜索
+        SearchHits<ArticleSearchDTO> search = elasticsearchRestTemplate.search(nativeSearchQueryBuilder.build(), ArticleSearchDTO.class);
+        // 获取搜索结果
+        List<SearchHit<ArticleSearchDTO>> hitList = search.getSearchHits();
+        // 替换文章内容高亮
+        List<ArticleSearchDTO> articleSearchDTOList = hitList.stream().map(hit -> {
+            ArticleSearchDTO article = hit.getContent();
+            // 获取文章标题高亮数据
+            List<String> titleHighLightList = hit.getHighlightFields().get("articleTitle");
+            if (com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isNotEmpty(titleHighLightList)) {
+                // 替换标题数据
+                article.setArticleTitle(titleHighLightList.get(0));
+            }
+            // 获取文章内容高亮数据
+            List<String> contentHighLightList = hit.getHighlightFields().get("articleContent");
+            if (com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isNotEmpty(contentHighLightList)) {
+                // 替换内容数据
+                article.setArticleContent(contentHighLightList.get(0));
+            }
+            return article;
+        }).collect(Collectors.toList());
+
+        return articleSearchDTOList;
     }
 }
 

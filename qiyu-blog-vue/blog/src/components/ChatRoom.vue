@@ -156,6 +156,7 @@
 import Recorderx, { ENCODE_TYPE } from "recorderx";
 import Emoji from "./Emoji";
 import EmojiList from "../assets/js/emoji";
+
 export default {
   components: {
     Emoji
@@ -205,14 +206,15 @@ export default {
     connect() {
       var that = this;
       console.log("建立连接");
-      this.websocket = new WebSocket("ws://127.0.0.1:8080/websocket");
+      this.websocket = new WebSocket("ws://127.0.0.1:8081/websocket");
       // 连接发生错误的回调方法
       this.websocket.onerror = function(event) {
         console.log(event);
-        alert("失败");
+        alert("建立连接失败");
       };
       // 连接成功建立的回调方法
       this.websocket.onopen = function(event) {
+        // alert("WebSocket建立连接成功!");
         console.log(event);
         // 发送心跳消息
         that.heartBeat = setInterval(function() {

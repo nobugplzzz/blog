@@ -126,5 +126,11 @@ public class ArticleController {
         articleService.saveArticleLike(articleId);
         return new Result<>(true, StatusCodeConst.OK, "点赞成功");
     }
+
+    @ApiOperation(value = "搜索文章")
+    @GetMapping("/articles/search")
+    public Result<List<ArticleSearchDTO>> listArticlesBySearch(ConditionVO condition) {
+        return new Result<>(true, StatusCodeConst.OK, "查询成功", articleService.listArticlesBySearch(condition));
+    }
 }
 

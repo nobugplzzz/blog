@@ -50,3 +50,7 @@ spring:
 mybatis-plus:
   mapper-locations: classpath*:/com/luqiyu/qiyublogspringboot/mapper/xml/**Mapper.xml
 
+#es配置
+elasticsearch:
+  host: 127.0.0.1
+  port: 9200
